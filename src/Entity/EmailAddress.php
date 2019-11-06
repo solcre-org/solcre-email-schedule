@@ -17,6 +17,7 @@ class EmailAddress
      * @param string $name
      * @param int $type
      */
+    
     public function __construct(string $email, string $name, int $type)
     {
         $this->email = $email;

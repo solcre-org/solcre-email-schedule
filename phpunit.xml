@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit colors="true">
+<phpunit
+        colors="true"
+        bootstrap="./test/bootstrap.php">
     <testsuites>
         <testsuite name="Solcre-Email-Schedule">
-            <directory>./tests</directory>
+            <directory>./test</directory>
         </testsuite>
     </testsuites>
 </phpunit>
