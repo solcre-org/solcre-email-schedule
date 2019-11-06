@@ -1,13 +1,13 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Service;
+namespace Solcre\EmailSchedule\Service;
 
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use InvalidArgumentException;
-use Solcre\SolcreEmailSchedule\Entity\ScheduleEmail;
-use Solcre\SolcreEmailSchedule\Exception\BaseException;
+use Solcre\EmailSchedule\Entity\ScheduleEmail;
+use Solcre\EmailSchedule\Exception\BaseException;
 
 class ScheduleEmailService
 {

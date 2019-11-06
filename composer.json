@@ -29,12 +29,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Solcre\\SolcreEmailSchedule\\": "./src"
+      "Solcre\\EmailSchedule\\": "./src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "SolcreEmailScheduleTest\\": "./tests/"
+      "EmailScheduleTest\\": "./tests/"
     }
   },
   "scripts": {

@@ -1,8 +1,8 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\TemplateService;
+namespace Solcre\EmailSchedule\TemplateService;
 
-use Solcre\SolcreEmailSchedule\Interfaces\TemplateInterface;
+use Solcre\EmailSchedule\Interfaces\TemplateInterface;
 use Twig\Environment;
 
 class TwigService implements TemplateInterface

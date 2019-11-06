@@ -1,12 +1,12 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Service;
+namespace Solcre\EmailSchedule\Service;
 
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Solcre\SolcreEmailSchedule\Entity\EmailAddress;
-use Solcre\SolcreEmailSchedule\Entity\ScheduleEmail;
+use Solcre\EmailSchedule\Entity\EmailAddress;
+use Solcre\EmailSchedule\Entity\ScheduleEmail;
 
 class SendScheduleEmailService extends LoggerService
 {

@@ -1,10 +1,10 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\TemplateService\Factory;
+namespace Solcre\EmailSchedule\TemplateService\Factory;
 
 use Interop\Container\ContainerInterface;
-use Solcre\SolcreEmailSchedule\Module;
-use Solcre\SolcreEmailSchedule\TemplateService\TwigService;
+use Solcre\EmailSchedule\Module;
+use Solcre\EmailSchedule\TemplateService\TwigService;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 use Zend\ServiceManager\Factory\FactoryInterface;

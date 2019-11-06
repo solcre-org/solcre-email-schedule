@@ -1,6 +1,6 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Entity;
+namespace Solcre\EmailSchedule\Entity;
 
 class EmailAddress
 {

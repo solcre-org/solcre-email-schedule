@@ -1,12 +1,12 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Entity;
+namespace Solcre\EmailSchedule\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="Solcre\SolcreEmailSchedule\Repository\ScheduleEmailRepository")
+ * @ORM\Entity(repositoryClass="Solcre\EmailSchedule\Repository\ScheduleEmailRepository")
  * @ORM\Table(name="schedule_emails")
  */
 class ScheduleEmail

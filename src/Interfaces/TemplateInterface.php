@@ -1,6 +1,6 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Interfaces;
+namespace Solcre\EmailSchedule\Interfaces;
 
 interface TemplateInterface
 {

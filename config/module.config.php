@@ -2,10 +2,10 @@
 
 namespace ZendSkeletonModule;
 
-use Solcre\SolcreEmailSchedule\Service;
-use Solcre\SolcreEmailSchedule\Service\Factory;
-use Solcre\SolcreEmailSchedule\TemplateService;
-use Solcre\SolcreEmailSchedule\TemplateService\Factory as TemplateServiceFactory;
+use Solcre\EmailSchedule\Service;
+use Solcre\EmailSchedule\Service\Factory;
+use Solcre\EmailSchedule\TemplateService;
+use Solcre\EmailSchedule\TemplateService\Factory as TemplateServiceFactory;
 
 return [
     'controllers' => [
