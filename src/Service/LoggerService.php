@@ -1,10 +1,10 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Service;
+namespace Solcre\EmailSchedule\Service;
 
 use Exception;
 use Psr\Log\LoggerInterface;
-use Solcre\SolcreEmailSchedule\Exception\BaseException;
+use Solcre\EmailSchedule\Exception\BaseException;
 
 class LoggerService
 {

@@ -1,15 +1,15 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Service;
+namespace Solcre\EmailSchedule\Service;
 
 use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Log\LoggerInterface;
-use Solcre\SolcreEmailSchedule\Entity\EmailAddress;
-use Solcre\SolcreEmailSchedule\Entity\ScheduleEmail;
-use Solcre\SolcreEmailSchedule\Exception\BaseException;
-use Solcre\SolcreEmailSchedule\Interfaces\TemplateInterface;
-use Solcre\SolcreEmailSchedule\Module;
+use Solcre\EmailSchedule\Entity\EmailAddress;
+use Solcre\EmailSchedule\Entity\ScheduleEmail;
+use Solcre\EmailSchedule\Exception\BaseException;
+use Solcre\EmailSchedule\Interfaces\TemplateInterface;
+use Solcre\EmailSchedule\Module;
 
 class EmailService extends LoggerService
 {

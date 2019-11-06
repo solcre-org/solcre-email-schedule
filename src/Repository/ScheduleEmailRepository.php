@@ -1,6 +1,6 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Repository;
+namespace Solcre\EmailSchedule\Repository;
 
 use DateTime;
 use Doctrine\ORM\EntityRepository;

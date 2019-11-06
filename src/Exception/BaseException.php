@@ -1,6 +1,6 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule\Exception;
+namespace Solcre\EmailSchedule\Exception;
 
 class BaseException extends \Exception
 {

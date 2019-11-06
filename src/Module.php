@@ -1,6 +1,6 @@
 <?php
 
-namespace Solcre\SolcreEmailSchedule;
+namespace Solcre\EmailSchedule;
 
 class Module
 {
