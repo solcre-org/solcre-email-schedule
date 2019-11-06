@@ -1,0 +1,16 @@
+<?php
+
+return [
+    'solcre_email_schedule' => [
+        'DEFAULT_FROM_EMAIL' => '',
+        'ASSETS_PATH'        => '',
+        'TEMPLATES_PATH'        => '',
+        'SMTP_CREDENTIALS'   => [
+            'ACTIVE'     => 1,
+            'HOST'     => '',
+            'USERNAME' => '',
+            'PASSWORD' => '',
+            'PORT'     => 999,
+        ]
+    ]
+];
