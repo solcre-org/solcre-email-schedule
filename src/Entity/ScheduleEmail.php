@@ -160,7 +160,7 @@ class ScheduleEmail
     /**
      * @param DateTime $sendAt
      */
-    public function setSendAt($sendAt): void
+    public function setSendAt(DateTime $sendAt): void
     {
         $this->sendAt = $sendAt;
     }
@@ -224,7 +224,7 @@ class ScheduleEmail
     /**
      * @param DateTime|null $sendingDate
      */
-    public function setSendingDate($sendingDate): void
+    public function setSendingDate(?DateTime $sendingDate): void
     {
         $this->sendingDate = $sendingDate;
     }
@@ -240,7 +240,7 @@ class ScheduleEmail
     /**
      * @param DateTime $createdAt
      */
-    public function setCreatedAt($createdAt): void
+    public function setCreatedAt(DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;
     }

@@ -4,6 +4,6 @@
 .DS_Store
 vendor/
 /.php_cs.cache
-/phpunit.xml
 /.phpunit.result.cache
+/test/reports
 .idea
