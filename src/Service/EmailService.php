@@ -13,10 +13,10 @@ use Solcre\EmailSchedule\Module;
 
 class EmailService extends LoggerService
 {
-    public const TYPE_FROM = 1;
-    public const TYPE_TO = 2;
-    public const TYPE_CC = 3;
-    public const TYPE_BCC = 4;
+    public const TYPE_FROM      = 1;
+    public const TYPE_TO        = 2;
+    public const TYPE_CC        = 3;
+    public const TYPE_BCC       = 4;
     public const TYPE_REPLAY_TO = 5;
 
     protected $configuration;
@@ -27,25 +27,29 @@ class EmailService extends LoggerService
     public function __construct(PHPMailer $mailer, $configuration, ScheduleEmailService $scheduleEmailService, TemplateInterface $templateService, ?LoggerInterface $logger)
     {
         parent::__construct($logger);
-        $this->mailer = $mailer;
-        $this->configuration = $configuration;
+        $this->mailer               = $mailer;
+        $this->configuration        = $configuration;
         $this->scheduleEmailService = $scheduleEmailService;
-        $this->templateService = $templateService;
+        $this->templateService      = $templateService;
     }
 
     public function sendTpl(array $vars, $templateName, array $addresses, string $subject, $charset = 'UTF-8', $altText = '', $from = null): ?bool
     {
         try {
-            $from = $this->getFromEmail($from);
+            $from      = $this->getFromEmail($from);
             $addresses = $this->generateAddresses($addresses);
+
             if (empty($addresses)) {
                 throw new BaseException('Addresses must not be empty', 422);
             }
+            
             $content = $this->getRenderTemplate($vars, $templateName);
+
             return $this->sendOrSaveEmail($from, $addresses, $content, $charset, $subject, $altText);
         } catch (Exception $e) {
             $this->logMessage($e, ['EMAIl-SERVICE-SEND-TPL']);
             unset($e);
+
             return false;
         }
     }
@@ -68,15 +72,18 @@ class EmailService extends LoggerService
     {
         $emailAddresses = [];
         foreach ($addresses as $address) {
+
             if (\is_array($address)) {
                 $email = $address['email'] ?? null;
                 $type = $address['type'] ?? null;
                 $name = $address['name'] ?? null;
+
                 if ($this->validateEmail($email) && $this->validateEmailType($type)) {
                     $emailAddresses[] = new EmailAddress($email, $name, $type);
                 }
             }
         }
+
         return $emailAddresses;
     }
 
@@ -88,6 +95,7 @@ class EmailService extends LoggerService
             self::TYPE_BCC,
             self::TYPE_REPLAY_TO
         ];
+
         return \in_array($type, $types, true);
     }
 
@@ -124,13 +132,16 @@ class EmailService extends LoggerService
     {
         try {
             $isSaved = $this->saveEmail($from, $addresses, $subject, $content, $altText, $charset);
+
             if (! $isSaved) {
                 return $this->send($from, $addresses, $subject, $content, $altText, $charset);
             }
+
             return $isSaved;
         } catch (\Exception $e) {
             $this->logMessage($e, ['EMAIl-SERVICE-SEND-OR-SAVE-EMAIL']);
             unset($e);
+
             return $this->send($from, $addresses, $subject, $content, $altText, $charset);
         }
     }
@@ -191,7 +202,9 @@ class EmailService extends LoggerService
         try {
             $this->mailer->CharSet = $charset;
             $this->mailer->setFrom($from->getEmail(), $from->getName());
+
             foreach ($addresses as $address) {
+
                 switch ($address->getType()) {
                     case self::TYPE_CC:
                         $this->mailer->addCC($address->getEmail(), $address->getName());
@@ -208,6 +221,7 @@ class EmailService extends LoggerService
                         break;
                 }
             }
+
             $this->mailer->Subject = $subject;
             $this->mailer->AltBody = $altText;
             $this->mailer->msgHTML($content);
@@ -225,7 +239,9 @@ class EmailService extends LoggerService
             if (! $this->mailer->send()) {
                 throw new BaseException($this->mailer->ErrorInfo, 400);
             }
+
             $this->mailer->clearAddresses();
+            
             return true;
         } catch (Exception $e) {
             throw new BaseException($e->getMessage(), $e->getCode());

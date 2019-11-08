@@ -224,7 +224,7 @@ class ScheduleEmail
     /**
      * @param DateTime|null $sendingDate
      */
-    public function setSendingDate(DateTime $sendingDate): void
+    public function setSendingDate(?DateTime $sendingDate): void
     {
         $this->sendingDate = $sendingDate;
     }

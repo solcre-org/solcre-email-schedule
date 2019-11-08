@@ -2,7 +2,6 @@
 
 use PHPUnit\Framework\TestCase;
 use Solcre\EmailSchedule\Service\EmailService;
-use Exception;
 use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Log\LoggerInterface;
 use Solcre\EmailSchedule\Entity\EmailAddress;
@@ -13,6 +12,5 @@ use Solcre\EmailSchedule\Module;
 
 class EmailServiceTest extends TestCase
 {
-
 
 }
