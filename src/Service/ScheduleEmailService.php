@@ -61,12 +61,12 @@ class ScheduleEmailService
     {
         return ! array_diff_key(array_flip($keys), $arr);
     }
-
+    
     public function anyArrayKeyExist(array $keys, array $data) : bool
     {
         $keysReceived = array_keys($data);
 
-        if (! count(array_intersect($keys, $keysReceived)) > 0) {
+        if ((! count(array_intersect($keys, $keysReceived))) > 0) {
                 return false;
         }
 
