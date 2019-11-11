@@ -62,12 +62,11 @@ class ScheduleEmailService
         return ! array_diff_key(array_flip($keys), $arr);
     }
 
-    public function keysToPatchExist($data) 
+    public function anyArrayKeyExist(array $keys, array $data) : bool
     {
-        $keysToPatch  = ['sendAt', 'isSending', 'retried'];
         $keysReceived = array_keys($data);
 
-        if (! count(array_intersect($keysToPatch, $keysReceived)) > 0)  {
+        if (! count(array_intersect($keys, $keysReceived)) > 0) {
                 return false;
         }
 
@@ -77,8 +76,7 @@ class ScheduleEmailService
     public function patchScheduleEmail(ScheduleEmail $scheduleEmailEntity, array $data): ScheduleEmail
     {
         try {
-
-            if (! $this->keysToPatchExist($data))  {
+            if (! $this->anyArraykeyExist(['sendAt', 'isSending', 'retried'], $data)) {
                 return $scheduleEmailEntity;
             }
 
