@@ -72,7 +72,6 @@ class EmailService extends LoggerService
     {
         $emailAddresses = [];
         foreach ($addresses as $address) {
-
             if (\is_array($address)) {
                 $email = $address['email'] ?? null;
                 $type = $address['type'] ?? null;
@@ -204,7 +203,6 @@ class EmailService extends LoggerService
             $this->mailer->setFrom($from->getEmail(), $from->getName());
 
             foreach ($addresses as $address) {
-
                 switch ($address->getType()) {
                     case self::TYPE_CC:
                         $this->mailer->addCC($address->getEmail(), $address->getName());

@@ -1,7 +1,11 @@
 <?php
 
+namespace SolcreFrameworkTest;
+
 use PHPUnit\Framework\TestCase;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
+use Exception;
+use DateTime;
 
 class ScheduleEmailTest extends TestCase
 {
@@ -16,10 +20,10 @@ class ScheduleEmailTest extends TestCase
         $charset     = "charset";
         $altText     = "altext";
         $content     = "a content";
-        $sendAt      = new \DateTime('2019-07-04T18:00');
-        $createdAt   = new \DateTime('2019-07-04T19:00');
+        $sendAt      = new DateTime('2019-07-04T18:00');
+        $createdAt   = new DateTime('2019-07-04T19:00');
         $retried     = 1;
-        $sendingDate = new \DateTime('2019-07-04T19:00');
+        $sendingDate = new DateTime('2019-07-04T19:00');
 
         $scheduleEmail->setId($id);
         $scheduleEmail->setEmailFrom($emailFrom);

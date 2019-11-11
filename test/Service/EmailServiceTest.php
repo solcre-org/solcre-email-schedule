@@ -1,5 +1,7 @@
 <?php
 
+namespace SolcreFrameworkTest;
+
 use PHPUnit\Framework\TestCase;
 use Solcre\EmailSchedule\Service\EmailService;
 use PHPMailer\PHPMailer\PHPMailer;
