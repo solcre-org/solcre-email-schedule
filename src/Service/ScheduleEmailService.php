@@ -38,9 +38,9 @@ class ScheduleEmailService
             $scheduleEmail->setSendingDate(null);
             $scheduleEmail->setSubject($data['subject']);
 
-
             $this->entityManager->persist($scheduleEmail);
             $this->entityManager->flush($scheduleEmail);
+
             return $scheduleEmail;
         } catch (Exception $exception) {
             throw new BaseException('Error creating schedule email', $exception->getCode());
@@ -50,6 +50,7 @@ class ScheduleEmailService
     private function validateData(array $data): bool
     {
         $required = ['content', 'subject', 'altText', 'addresses', 'from'];
+
         if (! $this->arrayKeysExists($required, $data)) {
             throw new InvalidArgumentException('Invalid data provided', 422);
         }
@@ -61,15 +62,31 @@ class ScheduleEmailService
         return ! array_diff_key(array_flip($keys), $arr);
     }
 
+    public function anyArrayKeyExist(array $keys, array $data) : bool
+    {
+        $keysReceived = array_keys($data);
+
+        if (! count(array_intersect($keys, $keysReceived)) > 0) {
+                return false;
+        }
+
+        return true;
+    }
+
     public function patchScheduleEmail(ScheduleEmail $scheduleEmailEntity, array $data): ScheduleEmail
     {
         try {
+            if (! $this->anyArraykeyExist(['sendAt', 'isSending', 'retried'], $data)) {
+                return $scheduleEmailEntity;
+            }
+
             if (array_key_exists('sendAt', $data)) {
                 $scheduleEmailEntity->setSendAt(new DateTime());
             }
 
             if (array_key_exists('isSending', $data)) {
                 $date = null;
+
                 if ($data['isSending']) {
                     $date = new DateTime();
                 }
@@ -81,6 +98,7 @@ class ScheduleEmailService
             }
 
             $this->entityManager->flush($scheduleEmailEntity);
+
             return $scheduleEmailEntity;
         } catch (Exception $exception) {
             throw new BaseException('Error patching schedule email', $exception->getCode());
@@ -112,6 +130,7 @@ class ScheduleEmailService
             $hourPast = \sprintf('- %s hour', self::DELAYED_EMAIL_HOUR);
             $delayedTime->modify($hourPast);
             $delayedMinutes = self::DELAYED_EMAIL_HOUR * 60;
+
             return $this->repository->processDelayedEmails($delayedTime->format('Y-m-d H:i:s'), $delayedMinutes);
         } catch (Exception $e) {
             throw  $e;
