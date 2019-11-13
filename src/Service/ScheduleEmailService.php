@@ -67,7 +67,7 @@ class ScheduleEmailService
         $keysReceived = array_keys($data);
 
         if ((! count(array_intersect($keys, $keysReceived))) > 0) {
-                return false;
+            return false;
         }
 
         return true;
