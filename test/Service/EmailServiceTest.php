@@ -14,5 +14,4 @@ use Solcre\EmailSchedule\Module;
 
 class EmailServiceTest extends TestCase
 {
-
 }
