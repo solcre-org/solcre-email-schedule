@@ -9,17 +9,17 @@ use DateTime;
 
 class ScheduleEmailTest extends TestCase
 {
-    public function testGettersAndSetters()
+    public function testGettersAndSetters(): void
     {
         $scheduleEmail = new ScheduleEmail();
 
         $id          = 1;
-        $emailFrom   = ["addressee 1", "addressee 2"];
-        $addresses   = ["addresses"];
-        $subject     = "a subject of email";
-        $charset     = "charset";
-        $altText     = "altext";
-        $content     = "a content";
+        $emailFrom   = ['addressee 1', 'addressee 2'];
+        $addresses   = ['addresses'];
+        $subject     = 'a subject of email';
+        $charset     = 'charset';
+        $altText     = 'altext';
+        $content     = 'a content';
         $sendAt      = new DateTime('2019-07-04T18:00');
         $createdAt   = new DateTime('2019-07-04T19:00');
         $retried     = 1;
