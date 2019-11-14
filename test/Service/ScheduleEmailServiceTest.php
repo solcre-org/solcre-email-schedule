@@ -308,4 +308,3 @@ class ScheduleEmailServiceTest extends TestCase
         $scheduleEmailService->processDelayedEmails();
     }
 }
-

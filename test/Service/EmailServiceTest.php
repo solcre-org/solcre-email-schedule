@@ -15,4 +15,5 @@ use Solcre\EmailSchedule\Module;
 use Doctrine\ORM\EntityManager;
 
 class EmailServiceTest extends TestCase
-{}
+{
+}
