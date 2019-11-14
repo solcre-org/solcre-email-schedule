@@ -34,7 +34,7 @@ class ScheduleEmailServiceTest extends TestCase
         $data = [
             'charset'   => 'charset',
             'addresses' => ['addresses'],
-            'altText'   => 'altext',
+            'altText'   => 'altText',
             'content'   => 'a content',
             'from'      => ['addressee 1', 'addressee 2'],
             'subject'   => 'a subject of email'
@@ -67,7 +67,7 @@ class ScheduleEmailServiceTest extends TestCase
         $data = [
             'charset'   => 'charset',
             'addresses' => ['addresses'],
-            'altText'   => 'altext',
+            'altText'   => 'altText',
             'from'      => ['addressee 1', 'addressee 2'],
             'subject'   => 'a subject of email'
         ];
@@ -87,7 +87,7 @@ class ScheduleEmailServiceTest extends TestCase
         $data = [
             'sendAt'    => null,
             'isSending' => ['addresses'],
-            'retried'   => 'altext',
+            'retried'   => 'retried',
             'content'   => 'a content',
             'from'      => ['addressee 1', 'addressee 2'],
             'subject'   => 'a subject of email'
@@ -135,7 +135,7 @@ class ScheduleEmailServiceTest extends TestCase
         $data = [
             'sendAt'    => null,
             'isSending' => ['addresses'],
-            'retried'   => 'altext',
+            'retried'   => 'retried',
             'content'   => 'a content',
             'from'      => ['addressee 1', 'addressee 2'],
             'subject'   => 'a subject of email'
