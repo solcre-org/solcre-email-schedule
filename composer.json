@@ -4,7 +4,10 @@
   "description": "Base stuff of many internal projects",
   "keywords": [
     "solcre",
-    "framework"
+    "framework",
+    "email",
+    "queue",
+    "phpmailer"
   ],
   "license": "BSD-3-Clause",
   "require": {
