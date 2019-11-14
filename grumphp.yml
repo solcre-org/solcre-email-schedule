@@ -9,6 +9,7 @@ parameters:
       whitelist_patterns: []
       ruleset: ['cleancode', 'codesize', 'controversial', 'design']
       triggered_by: ['php']
+      exclude: ['/test']
     phpstan:
       autoload_file: ~
       configuration: ~
@@ -84,7 +85,7 @@ parameters:
       config_file: ~
       testsuite: ~
       group: []
-      always_execute: false
+      always_execute: true
     securitychecker:
       lockfile: ./composer.lock
       format: ~
