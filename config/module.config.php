@@ -8,7 +8,7 @@ use Solcre\EmailSchedule\TemplateService;
 use Solcre\EmailSchedule\TemplateService\Factory as TemplateServiceFactory;
 
 return [
-    'controllers' => [
+    'service_manager' => [
         'factories' => [
             Service\EmailService::class             => Factory\EmailServiceFactory::class,
             Service\ScheduleEmailService::class     => Factory\ScheduleEmailServiceFactory::class,
