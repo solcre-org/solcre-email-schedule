@@ -17,6 +17,7 @@ use function InvalidPhpDoc\variadicNumbers;
 
 class EmailServiceTest extends TestCase
 {
+
     public const TYPE_FROM      = 1;
     public const TYPE_TO        = 2;
     public const TYPE_CC        = 3;

@@ -6,7 +6,7 @@ class EmailAddress
 {
     /* @var string */
     private $email;
-    /* @var string */
+    /* @var string|null */
     private $name;
     /* @var int */
     private $type;
@@ -14,10 +14,11 @@ class EmailAddress
     /**
      * EmailAddress constructor.
      * @param string $email
-     * @param string $name
+     * @param string|null $name
      * @param int $type
      */
-    public function __construct(string $email, string $name, int $type)
+
+    public function __construct(string $email, ?string $name, int $type)
     {
         $this->email = $email;
         $this->name = $name;
@@ -41,17 +42,17 @@ class EmailAddress
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getName(): string
+    public function getName(): ?string
     {
         return $this->name;
     }
 
     /**
-     * @param string $name
+     * @param string|null $name
      */
-    public function setName(string $name): void
+    public function setName(?string $name): void
     {
         $this->name = $name;
     }

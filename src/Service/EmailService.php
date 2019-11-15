@@ -13,10 +13,10 @@ use Solcre\EmailSchedule\Module;
 
 class EmailService extends LoggerService
 {
-    public const TYPE_FROM      = 1;
-    public const TYPE_TO        = 2;
-    public const TYPE_CC        = 3;
-    public const TYPE_BCC       = 4;
+    public const TYPE_FROM = 1;
+    public const TYPE_TO = 2;
+    public const TYPE_CC = 3;
+    public const TYPE_BCC = 4;
     public const TYPE_REPLAY_TO = 5;
 
     protected $configuration;
@@ -27,22 +27,22 @@ class EmailService extends LoggerService
     public function __construct(PHPMailer $mailer, $configuration, ScheduleEmailService $scheduleEmailService, TemplateInterface $templateService, ?LoggerInterface $logger)
     {
         parent::__construct($logger);
-        $this->mailer               = $mailer;
-        $this->configuration        = $configuration;
+        $this->mailer = $mailer;
+        $this->configuration = $configuration;
         $this->scheduleEmailService = $scheduleEmailService;
-        $this->templateService      = $templateService;
+        $this->templateService = $templateService;
     }
 
     public function sendTpl(array $vars, $templateName, array $addresses, string $subject, $charset = 'UTF-8', $altText = '', $from = null): ?bool
     {
         try {
-            $from      = $this->getFromEmail($from);
+            $from = $this->getFromEmail($from);
             $addresses = $this->generateAddresses($addresses);
 
             if (empty($addresses)) {
                 throw new BaseException('Addresses must not be empty', 422);
             }
-            
+
             $content = $this->getRenderTemplate($vars, $templateName);
 
             return $this->sendOrSaveEmail($from, $addresses, $content, $charset, $subject, $altText);
@@ -240,7 +240,7 @@ class EmailService extends LoggerService
             }
 
             $this->mailer->clearAddresses();
-            
+
             return true;
         } catch (Exception $e) {
             throw new BaseException($e->getMessage(), $e->getCode());

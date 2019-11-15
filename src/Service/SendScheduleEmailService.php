@@ -140,7 +140,7 @@ class SendScheduleEmailService extends LoggerService
 
     private function createEmailFrom(array $fromEmail): EmailAddress
     {
-        return new EmailAddress($fromEmail['email'], $fromEmail['name'], $fromEmail['type']);
+        return new EmailAddress($fromEmail['email'], $fromEmail['name'] ?? null, $fromEmail['type']);
     }
 
     private function sendEmail(EmailAddress $from, array $addressesToEmail, ScheduleEmail $scheduleEmail)
