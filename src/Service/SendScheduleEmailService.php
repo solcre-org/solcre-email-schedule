@@ -28,6 +28,7 @@ class SendScheduleEmailService extends LoggerService
             $this->entityManager->getConnection()->exec('LOCK TABLES schedule_emails as se WRITE;');
             $scheduledEmailsToSend = $this->scheduleEmailService->fetchAvailableScheduledEmails();
             $result = false;
+
             if (! empty($scheduledEmailsToSend) && is_array($scheduledEmailsToSend)) {
                 $result = $this->markEmailAsSending($scheduledEmailsToSend);
 
@@ -65,12 +66,15 @@ class SendScheduleEmailService extends LoggerService
         try {
             $result = $this->scheduleEmailService->markEmailAsSending($emailsToSendIds);
             $this->entityManager->getConnection()->exec('UNLOCK TABLES;');
+
             if (! $result) {
                 return false;
             }
+
             foreach ($emailsToSend as $email) {
                 $this->entityManager->refresh($email);
             }
+
             return true;
         } catch (Exception $e) {
             throw $e;
