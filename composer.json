@@ -1,10 +1,13 @@
 {
-  "name": "solcre-org/solcre-email-schedule",
+  "name": "solcre/solcre-email-schedule",
   "type": "project",
   "description": "Base stuff of many internal projects",
   "keywords": [
     "solcre",
-    "framework"
+    "framework",
+    "email",
+    "queue",
+    "phpmailer"
   ],
   "license": "BSD-3-Clause",
   "require": {
