@@ -54,6 +54,7 @@ class ScheduleEmailService
         if (! $this->arrayKeysExists($required, $data)) {
             throw new InvalidArgumentException('Invalid data provided', 422);
         }
+
         return true;
     }
 

@@ -18,7 +18,11 @@ use function InvalidPhpDoc\variadicNumbers;
 class EmailServiceTest extends TestCase
 {
 
-    public const TYPE_FROM = 1;
+    public const TYPE_FROM      = 1;
+    public const TYPE_TO        = 2;
+    public const TYPE_CC        = 3;
+    public const TYPE_BCC       = 4;
+    public const TYPE_REPLAY_TO = 5;
 
     private $mailer;
     private $configuration;
@@ -28,26 +32,17 @@ class EmailServiceTest extends TestCase
     private $mockedLogger;
     private $emailService;
 
-   /* public function testCreateWithParams(): void
+    public function setUp(): void
     {
-        // how test?
-        $mailer               = new PHPMailer();
-        $configuration        = 'the configuration';
-        $mockedEntityManager  = $this->createMock(EntityManager::class);
-        $scheduleEmailService = new ScheduleEmailService($mockedEntityManager);
-        $templateInterface    = $this->createMock(TemplateInterface::class);
-        $logger               = $this->createMock(LoggerInterface::class);
 
-        $emailService = new EmailService($mailer, $configuration, $scheduleEmailService, $templateInterface, $logger);
+        $this->mailer = $this->getMockBuilder(PHPMailer::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['send'])
+            ->getMock();
 
-        $this->assertEquals('mailer', $emailService->getEmail());
-    }*/
+        $this->mailer->method('send')->willReturn(true);
 
-   public function setUp(): void
-   {
-       $this->mailer = new PHPMailer();
-
-       $this->configuration           = [
+        $this->configuration           = [
            'solcre_email_schedule' => [
                'DEFAULT_FROM_EMAIL' => '',
                'ASSETS_PATH'        => '',
@@ -60,54 +55,33 @@ class EmailServiceTest extends TestCase
                    'PORT'     => 999,
                ]
            ]
-       ];
+        ];
 
-       $this->mockedEntityManager     = $this->createMock(EntityManager::class);
-       $this->scheduleEmailService    = new ScheduleEmailService($this->mockedEntityManager);
-       $this->mockedTemplateInterface = $this->createMock(TemplateInterface::class);
-       $this->mockedLogger            = $this->createMock(LoggerInterface::class);
+        $this->mockedEntityManager     = $this->createMock(EntityManager::class);
+        $this->scheduleEmailService    = new ScheduleEmailService($this->mockedEntityManager);
+        $this->mockedTemplateInterface = $this->createMock(TemplateInterface::class);
+        $this->mockedLogger            = $this->createMock(LoggerInterface::class);
 
-       $this->emailService = new EmailService($this->mailer, $this->configuration, $this->scheduleEmailService,
-           $this->mockedTemplateInterface, $this->mockedLogger);
-   }
+        $this->emailService = new EmailService(
+            $this->mailer,
+            $this->configuration,
+            $this->scheduleEmailService,
+            $this->mockedTemplateInterface,
+            $this->mockedLogger
+        );
+    }
 
-    /*
-    public function testSendTpl()
+    public function testSendTplWithEmptyAddresses(): void
     {
-        $vars = [];
+        $vars         = [];
         $templateName = 'templateName';
-        $addresses = [];
-        $subject = 'subject';
+        $addresses    = [];
+        $subject      = 'subject';
 
-        $address_1 = [
-            'email' => 'jon_doe@solcre.com',
-            'name'  => 'Jon Doe',
-            'type'  => 2
-        ];
+        $this->expectException(BaseException::class);
 
-        $address_2 = [
-            'email' => 'jon_doe2@solcre.com',
-            'name'  => 'Jon Doe2',
-            'type'  => 2
-        ];
-
-        $address_3 = [
-            'email' => 'jon_doe3@solcre.com',
-            'name'  => 'Jon Doe3',
-            'type'  => 2
-        ];
-
-        $addresses = $this->emailService->generateAddresses([$address_1, $address_2, $address_3]);
-        $from      = $this->emailService->getFromEmail(null);
-        //$content   = $content = $this->emailService->getRenderTemplate($vars, $templateName);
-        // no permite llamar metodo privado getRenderTemplate, por tanto contetn queda indefinido.
-
-        //$expectedRet = $this->emailService->sendTpl($from, $addresses, $content, $charset, $subject, $altText);
-        //var_dump($expectedRet);
-
-
-        //$this->emailService->sendTpl($vars, $templateName, $addresses)
-    }*/
+        $this->emailService->sendTpl($vars, $templateName, $addresses, $subject);
+    }
 
     public function testGetFromEmail(): void
     {
@@ -195,50 +169,93 @@ class EmailServiceTest extends TestCase
         $this->assertEquals($this->emailService->generateAddresses($addresses), $expectedAddresses);
     }
 
-    public function testSend()
+    public function sendSetup(): array
     {
-        /*(EmailAddress $from,
-        array $addresses, string $subject, string $content,
-        string $charset = PHPMailer::CHARSET_UTF8,
-        $altText = 'To view the message, please use an HTML compatible email viewer!')*/
-
         $from = new EmailAddress('jon_doe@solcre.com', 'Jhon Doe', 2);
 
         $data_1 = [
             'email' => 'jon_doe@solcre.com',
             'name'  => 'Jon Doe',
             'type'  => 1
-                ];
+        ];
 
         $data_2 = [
             'email' => 'jon_doe2@solcre.com',
             'name'  => 'Jon Doe2',
-            'type'  => 1
+            'type'  => 2
         ];
 
         $data_3 = [
             'email' => 'jon_doe3@solcre.com',
             'name'  => 'Jon Doe3',
-            'type'  => 1
+            'type'  => 3
+        ];
+
+        $data_4 = [
+            'email' => 'jon_doe4@solcre.com',
+            'name'  => 'Jon Doe4',
+            'type'  => 4
+        ];
+
+        $data_5 = [
+            'email' => 'jon_doe5@solcre.com',
+            'name'  => 'Jon Doe5',
+            'type'  => 5
         ];
 
         $address_1 = new EmailAddress($data_1['email'], $data_1['name'], $data_1['type']);
         $address_2 = new EmailAddress($data_2['email'], $data_2['name'], $data_2['type']);
         $address_3 = new EmailAddress($data_3['email'], $data_3['name'], $data_3['type']);
+        $address_4 = new EmailAddress($data_4['email'], $data_4['name'], $data_4['type']);
+        $address_5 = new EmailAddress($data_5['email'], $data_5['name'], $data_5['type']);
 
-        $addresses = [$address_1, $address_2, $address_3];
+        $addresses = [$address_1, $address_2, $address_3, $address_4, $address_5];
 
         $subject = 'any subject';
         $content = 'a content';
-        $charset = PHPMailer::CHARSET_UTF8;
 
-        $this->AssertTrue($this->emailService->send($from, $addresses, $subject, $content ));
-        /*
-         *  if (! $this->mailer->send()) {
-                throw new BaseException($this->mailer->ErrorInfo, 400);
-            }
-            Este fragmento da false porque no envia el mail. no conecta host y demas
-         */
+        return [
+            'from'      => $from,
+            'addresses' => $addresses,
+            'subject'   => $subject,
+            'content'   => $content
+        ];
+    }
 
+    public function testSend(): void
+    {
+        $data = $this->sendSetup();
+
+        $this->AssertTrue($this->emailService->send($data['from'], $data['addresses'], $data['subject'], $data['content']));
+    }
+
+    public function sendSetupWithException(): EmailService
+    {
+        $mockMailer = $this->getMockBuilder(PHPMailer::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['send'])
+            ->getMock();
+
+        $mockMailer->method('send')->willReturn(false);
+
+        $emailService = new EmailService(
+            $mockMailer,
+            $this->configuration,
+            $this->scheduleEmailService,
+            $this->mockedTemplateInterface,
+            $this->mockedLogger
+        );
+
+        return $emailService;
+    }
+
+    public function testSendWithException(): void
+    {
+        $data = $this->sendSetup();
+        $emailService = $this->sendSetupWithException();
+
+        $this->expectException(BaseException::class);
+
+        $emailService->send($data['from'], $data['addresses'], $data['subject'], $data['content']);
     }
 }

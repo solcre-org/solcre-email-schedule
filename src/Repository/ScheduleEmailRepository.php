@@ -45,11 +45,14 @@ class ScheduleEmailRepository extends EntityRepository
                     'date' => $date->format('Y-m-d H:i:s')
                 ]
             );
+
             if ($rowAffected === \count($emailsIds)) {
                 return true;
             }
+
             $rollBackQuery = "UPDATE schedule_emails as se SET se.sending_date = NULL WHERE se.id IN(" . implode(',', $emailsIds) . ")";
             $connection->executeUpdate($rollBackQuery);
+
             return false;
         } catch (Exception $e) {
             throw $e;
