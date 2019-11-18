@@ -116,19 +116,19 @@ class EmailServiceTest extends TestCase
         $address_1 = [
             'email' => 'jon_doe@solcre.com',
             'name'  => 'Jon Doe',
-            'type'  => 2
+            'type'  => self::TYPE_TO
         ];
 
         $address_2 = [
             'email' => 'jon_doe2@solcre.com',
             'name'  => 'Jon Doe2',
-            'type'  => 2
+            'type'  => self::TYPE_TO
         ];
 
         $address_3 = [
             'email' => 'jon_doe3@solcre.com',
             'name'  => 'Jon Doe3',
-            'type'  => 2
+            'type'  => self::TYPE_TO
         ];
 
         $expectedAddress_1 = new EmailAddress($address_1['email'], $address_1['name'], $address_1['type']);
@@ -147,19 +147,19 @@ class EmailServiceTest extends TestCase
         $address_1 = [
             'email' => 'jon_doe@solcre.com',
             'name'  => 'Jon Doe',
-            'type'  => 1
+            'type'  => self::TYPE_FROM
         ];
 
         $address_2 = [
             'email' => 'jon_doe2@solcre.com',
             'name'  => 'Jon Doe2',
-            'type'  => 1
+            'type'  => self::TYPE_FROM
         ];
 
         $address_3 = [
             'email' => 'jon_doe3@solcre.com',
             'name'  => 'Jon Doe3',
-            'type'  => 1
+            'type'  => self::TYPE_FROM
         ];
 
         $expectedAddresses  = [];
@@ -176,31 +176,31 @@ class EmailServiceTest extends TestCase
         $data_1 = [
             'email' => 'jon_doe@solcre.com',
             'name'  => 'Jon Doe',
-            'type'  => 1
+            'type'  => self::TYPE_FROM
         ];
 
         $data_2 = [
             'email' => 'jon_doe2@solcre.com',
             'name'  => 'Jon Doe2',
-            'type'  => 2
+            'type'  => self::TYPE_FROM
         ];
 
         $data_3 = [
             'email' => 'jon_doe3@solcre.com',
             'name'  => 'Jon Doe3',
-            'type'  => 3
+            'type'  => self::TYPE_CC
         ];
 
         $data_4 = [
             'email' => 'jon_doe4@solcre.com',
             'name'  => 'Jon Doe4',
-            'type'  => 4
+            'type'  => self::TYPE_BCC
         ];
 
         $data_5 = [
             'email' => 'jon_doe5@solcre.com',
             'name'  => 'Jon Doe5',
-            'type'  => 5
+            'type'  => self::TYPE_REPLAY_TO
         ];
 
         $address_1 = new EmailAddress($data_1['email'], $data_1['name'], $data_1['type']);
