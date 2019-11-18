@@ -71,43 +71,17 @@ class EmailServiceTest extends TestCase
         );
     }
 
-    /*
-    public function testSendTpl()
+    public function testSendTplWithEmptyAddresses(): void
     {
-        $vars = [];
+        $vars         = [];
         $templateName = 'templateName';
-        $addresses = [];
-        $subject = 'subject';
+        $addresses    = [];
+        $subject      = 'subject';
 
-        $address_1 = [
-            'email' => 'jon_doe@solcre.com',
-            'name'  => 'Jon Doe',
-            'type'  => 2
-        ];
+        $this->expectException(BaseException::class);
 
-        $address_2 = [
-            'email' => 'jon_doe2@solcre.com',
-            'name'  => 'Jon Doe2',
-            'type'  => 2
-        ];
-
-        $address_3 = [
-            'email' => 'jon_doe3@solcre.com',
-            'name'  => 'Jon Doe3',
-            'type'  => 2
-        ];
-
-        $addresses = $this->emailService->generateAddresses([$address_1, $address_2, $address_3]);
-        $from      = $this->emailService->getFromEmail(null);
-        //$content   = $content = $this->emailService->getRenderTemplate($vars, $templateName);
-        // no permite llamar metodo privado getRenderTemplate, por tanto contetn queda indefinido.
-
-        //$expectedRet = $this->emailService->sendTpl($from, $addresses, $content, $charset, $subject, $altText);
-        //var_dump($expectedRet);
-
-
-        //$this->emailService->sendTpl($vars, $templateName, $addresses)
-    }*/
+        $this->emailService->sendTpl($vars, $templateName, $addresses, $subject);
+    }
 
     public function testGetFromEmail(): void
     {
