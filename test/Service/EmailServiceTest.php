@@ -37,7 +37,7 @@ class EmailServiceTest extends TestCase
 
         $this->mailer = $this->getMockBuilder(PHPMailer::class)
             ->disableOriginalConstructor()
-            ->setMethods(['send'])
+            ->onlyMethods(['send'])
             ->getMock();
 
         $this->mailer->method('send')->willReturn(true);
@@ -233,7 +233,7 @@ class EmailServiceTest extends TestCase
     {
         $mockMailer = $this->getMockBuilder(PHPMailer::class)
             ->disableOriginalConstructor()
-            ->setMethods(['send'])
+            ->onlyMethods(['send'])
             ->getMock();
 
         $mockMailer->method('send')->willReturn(false);
