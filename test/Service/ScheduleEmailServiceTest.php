@@ -81,7 +81,7 @@ class ScheduleEmailServiceTest extends TestCase
     {
         $mockedScheduleEmailEntity = $this->getMockBuilder(ScheduleEmail::class)
                                      ->disableOriginalConstructor()
-                                     ->setMethods(['setSendAt', 'setSendingDate', 'setRetried'])
+                                     ->onlyMethods(['setSendAt', 'setSendingDate', 'setRetried'])
                                      ->getMock();
 
         $data = [
@@ -129,7 +129,7 @@ class ScheduleEmailServiceTest extends TestCase
 
         $mockedScheduleEmailEntity = $this->getMockBuilder(ScheduleEmail::class)
                                      ->disableOriginalConstructor()
-                                     ->setMethods(['setSendAt', 'setSendingDate', 'setRetried'])
+                                     ->onlyMethods(['setSendAt', 'setSendingDate', 'setRetried'])
                                      ->getMock();
 
         $data = [

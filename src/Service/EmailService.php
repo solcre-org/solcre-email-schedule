@@ -193,6 +193,7 @@ class EmailService extends LoggerService
         }
 
         $scheduleEntity = $this->scheduleEmailService->add($data);
+
         return $scheduleEntity instanceof ScheduleEmail;
     }
 
