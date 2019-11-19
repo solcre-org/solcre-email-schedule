@@ -17,6 +17,7 @@ class SendScheduleEmailServiceFactory implements FactoryInterface
         $scheduleEmailService = $container->get(ScheduleEmailService::class);
         $emailService = $container->get(EmailService::class);
         $logger = null; // TODO Soportar Loggger
+
         return new SendScheduleEmailService($doctrineService, $scheduleEmailService, $emailService, $logger);
     }
 }

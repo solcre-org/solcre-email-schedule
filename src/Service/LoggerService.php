@@ -30,6 +30,7 @@ class LoggerService
     private function validateLevel(string $level): void
     {
         $level = \strtolower($level);
+
         if (\in_array($level, self::LEVELS, true)) {
             throw new BaseException('Log level does not exists', 404);
         }
