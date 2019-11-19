@@ -98,16 +98,13 @@ class EmailService extends LoggerService
         return \in_array($type, $types, true);
     }
 
-    private function getRenderTemplate(
-        array $data,
-        string $templatePath
-    ): string {
+    private function getRenderTemplate(array $data, string $templatePath): string
+    {
         return $this->templateService->render($templatePath, $this->mergeDefaultVariables($data));
     }
 
-    private function mergeDefaultVariables(
-        array $data = []
-    ): array {
+    private function mergeDefaultVariables(array $data = []): array
+    {
         $defaultVariables = $this->getDefaultVariables();
         if (! empty($data)) {
             return \array_merge($defaultVariables, $data);
@@ -117,14 +114,7 @@ class EmailService extends LoggerService
 
     private function getDefaultVariables(): array
     {
-        return [
-            'images_path' => $this->getEmailAssetsPath(),
-        ];
-    }
-
-    private function getEmailAssetsPath(): string
-    {
-        return $this->configuration[Module::CONFIG_KEY]['ASSETS_PATH'];
+        return $this->configuration[Module::CONFIG_KEY]['DEFAULT_VARIABLES'];
     }
 
     private function sendOrSaveEmail(EmailAddress $from, array $addresses, string $content, string $charset, string $subject, $altText = ''): ?bool
@@ -193,6 +183,7 @@ class EmailService extends LoggerService
         }
 
         $scheduleEntity = $this->scheduleEmailService->add($data);
+
         return $scheduleEntity instanceof ScheduleEmail;
     }
 
