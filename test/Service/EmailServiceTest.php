@@ -2,25 +2,22 @@
 
 namespace SolcreFrameworkTest;
 
-use PHPUnit\Framework\TestCase;
-use Solcre\EmailSchedule\Service\EmailService;
-use Solcre\EmailSchedule\Service\ScheduleEmailService;
+use Doctrine\ORM\EntityManager;
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use Solcre\EmailSchedule\Entity\EmailAddress;
-use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use Solcre\EmailSchedule\Exception\BaseException;
 use Solcre\EmailSchedule\Interfaces\TemplateInterface;
-use Solcre\EmailSchedule\Module;
-use Doctrine\ORM\EntityManager;
-use function InvalidPhpDoc\variadicNumbers;
+use Solcre\EmailSchedule\Service\EmailService;
+use Solcre\EmailSchedule\Service\ScheduleEmailService;
 
 class EmailServiceTest extends TestCase
 {
-    public const TYPE_FROM      = 1;
-    public const TYPE_TO        = 2;
-    public const TYPE_CC        = 3;
-    public const TYPE_BCC       = 4;
+    public const TYPE_FROM = 1;
+    public const TYPE_TO = 2;
+    public const TYPE_CC = 3;
+    public const TYPE_BCC = 4;
     public const TYPE_REPLAY_TO = 5;
 
     private $mailer;
@@ -40,25 +37,27 @@ class EmailServiceTest extends TestCase
 
         $this->mailer->method('send')->willReturn(true);
 
-        $this->configuration           = [
-           'solcre_email_schedule' => [
-               'DEFAULT_FROM_EMAIL' => '',
-               'ASSETS_PATH'        => '',
-               'TEMPLATES_PATH'        => '',
-               'SMTP_CREDENTIALS'   => [
-                   'ACTIVE'     => 1,
-                   'HOST'     => '',
-                   'USERNAME' => '',
-                   'PASSWORD' => '',
-                   'PORT'     => 999,
-               ]
-           ]
+        $this->configuration = [
+            'solcre_email_schedule' => [
+                'DEFAULT_FROM_EMAIL' => '',
+                'TEMPLATES_PATH'     => '',
+                'SMTP_CREDENTIALS'   => [
+                    'ACTIVE'   => 1,
+                    'HOST'     => '',
+                    'USERNAME' => '',
+                    'PASSWORD' => '',
+                    'PORT'     => 999,
+                ],
+                'DEFAULT_VARAIBLES'  => [
+                    'ASSETS_PATH' => ''
+                ]
+            ]
         ];
 
-        $this->mockedEntityManager     = $this->createMock(EntityManager::class);
-        $this->scheduleEmailService    = new ScheduleEmailService($this->mockedEntityManager);
+        $this->mockedEntityManager = $this->createMock(EntityManager::class);
+        $this->scheduleEmailService = new ScheduleEmailService($this->mockedEntityManager);
         $this->mockedTemplateInterface = $this->createMock(TemplateInterface::class);
-        $this->mockedLogger            = $this->createMock(LoggerInterface::class);
+        $this->mockedLogger = $this->createMock(LoggerInterface::class);
 
         $this->emailService = new EmailService(
             $this->mailer,
@@ -71,10 +70,10 @@ class EmailServiceTest extends TestCase
 
     public function testSendTplWithEmptyAddresses(): void
     {
-        $vars         = [];
+        $vars = [];
         $templateName = 'templateName';
-        $addresses    = [];
-        $subject      = 'subject';
+        $addresses = [];
+        $subject = 'subject';
 
         $this->expectException(BaseException::class);
 
@@ -133,7 +132,7 @@ class EmailServiceTest extends TestCase
         $expectedAddress_2 = new EmailAddress($address_2['email'], $address_2['name'], $address_2['type']);
         $expectedAddress_3 = new EmailAddress($address_3['email'], $address_3['name'], $address_3['type']);
 
-        $expectedAddresses  = [$expectedAddress_1, $expectedAddress_2, $expectedAddress_3];
+        $expectedAddresses = [$expectedAddress_1, $expectedAddress_2, $expectedAddress_3];
 
         $addresses = [$address_1, $address_2, $address_3];
 
@@ -160,11 +159,18 @@ class EmailServiceTest extends TestCase
             'type'  => self::TYPE_FROM
         ];
 
-        $expectedAddresses  = [];
+        $expectedAddresses = [];
 
         $addresses = [$address_1, $address_2, $address_3];
 
         $this->assertEquals($this->emailService->generateAddresses($addresses), $expectedAddresses);
+    }
+
+    public function testSend(): void
+    {
+        $data = $this->sendSetup();
+
+        $this->AssertTrue($this->emailService->send($data['from'], $data['addresses'], $data['subject'], $data['content']));
     }
 
     public function sendSetup(): array
@@ -220,11 +226,14 @@ class EmailServiceTest extends TestCase
         ];
     }
 
-    public function testSend(): void
+    public function testSendWithException(): void
     {
         $data = $this->sendSetup();
+        $emailService = $this->sendSetupWithException();
 
-        $this->AssertTrue($this->emailService->send($data['from'], $data['addresses'], $data['subject'], $data['content']));
+        $this->expectException(BaseException::class);
+
+        $emailService->send($data['from'], $data['addresses'], $data['subject'], $data['content']);
     }
 
     public function sendSetupWithException(): EmailService
@@ -245,15 +254,5 @@ class EmailServiceTest extends TestCase
         );
 
         return $emailService;
-    }
-
-    public function testSendWithException(): void
-    {
-        $data = $this->sendSetup();
-        $emailService = $this->sendSetupWithException();
-
-        $this->expectException(BaseException::class);
-
-        $emailService->send($data['from'], $data['addresses'], $data['subject'], $data['content']);
     }
 }

@@ -3,7 +3,6 @@
 return [
     'solcre_email_schedule' => [
         'DEFAULT_FROM_EMAIL' => '',
-        'ASSETS_PATH'        => '',
         'TEMPLATES_PATH'        => '',
         'SMTP_CREDENTIALS'   => [
             'ACTIVE'     => 1,
@@ -11,6 +10,9 @@ return [
             'USERNAME' => '',
             'PASSWORD' => '',
             'PORT'     => 999,
+        ],
+        'DEFAULT_VARIABLES' => [
+            'ASSETS_PATH'        => '',
         ]
     ]
 ];
