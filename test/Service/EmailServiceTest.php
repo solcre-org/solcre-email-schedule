@@ -17,7 +17,6 @@ use function InvalidPhpDoc\variadicNumbers;
 
 class EmailServiceTest extends TestCase
 {
-
     public const TYPE_FROM      = 1;
     public const TYPE_TO        = 2;
     public const TYPE_CC        = 3;
@@ -34,7 +33,6 @@ class EmailServiceTest extends TestCase
 
     public function setUp(): void
     {
-
         $this->mailer = $this->getMockBuilder(PHPMailer::class)
             ->disableOriginalConstructor()
             ->onlyMethods(['send'])

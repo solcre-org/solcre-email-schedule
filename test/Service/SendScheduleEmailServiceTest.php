@@ -48,7 +48,8 @@ class SendScheduleEmailServiceTest extends TestCase
             ->getMock();
 
         $returnTrue = new class() {
-            public function exec() {
+            public function exec()
+            {
                 return true;
             }
         };
