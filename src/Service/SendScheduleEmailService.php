@@ -22,7 +22,7 @@ class SendScheduleEmailService extends LoggerService
         $this->emailService = $emailService;
     }
 
-    public function sendScheduledEmails(): ?array
+    public function sendScheduledEmails(): bool
     {
         try {
             $this->entityManager->getConnection()->exec('LOCK TABLES schedule_emails as se WRITE;');
@@ -39,9 +39,8 @@ class SendScheduleEmailService extends LoggerService
                     $this->entityManager->commit();
                 }
             }
-            return [
-                'success' => $result
-            ];
+
+            return $result;
         } catch (\Exception $e) {
             if ($this->entityManager->isOpen()) {
                 $this->entityManager->flush();
