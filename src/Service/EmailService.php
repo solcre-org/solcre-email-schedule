@@ -219,10 +219,12 @@ class EmailService extends LoggerService
             if ($isSMTP) {
                 $this->mailer->isSMTP();
                 $this->mailer->SMTPAuth = true;
+                $this->mailer->SMTPDebug = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['DEBUG'];
                 $this->mailer->Host = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['HOST'];
                 $this->mailer->Username = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['USERNAME'];
                 $this->mailer->Password = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PASSWORD'];
                 $this->mailer->Port = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PORT'];
+                $this->mailer->SMTPSecure = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['SECURE'];
             }
 
             if (! $this->mailer->send()) {
