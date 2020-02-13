@@ -150,8 +150,8 @@ class SendScheduleEmailService extends LoggerService
                 $addressesToEmail,
                 $scheduleEmail->getSubject(),
                 $scheduleEmail->getContent(),
-                $scheduleEmail->getAltText(),
-                $scheduleEmail->getCharset()
+                $scheduleEmail->getCharset(),
+                $scheduleEmail->getAltText()
             );
         } catch (Exception $e) {
             return false;
