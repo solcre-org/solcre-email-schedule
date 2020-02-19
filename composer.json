@@ -14,7 +14,7 @@
     "php": "^7.3",
     "doctrine/orm": "^2.6",
     "phpmailer/phpmailer": "^6.1",
-    "twig/twig": "^2.12",
+    "twig/twig": "^3.0",
     "zendframework/zend-servicemanager": "^3.4"
   },
   "require-dev": {
