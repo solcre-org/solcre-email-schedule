@@ -54,13 +54,14 @@ class EmailService extends LoggerService
         }
     }
 
-    public function getFromEmail($from = null): EmailAddress
+    public function getFromEmail($from = null, $fromName = null): EmailAddress
     {
         if (empty($from) || ! $this->validateEmail($from)) {
             $from = $this->configuration[Module::CONFIG_KEY]['DEFAULT_FROM_EMAIL'];
+            $fromName = $this->configuration[Module::CONFIG_KEY]['DEFAULT_FROM_NAME_EMAIL'] ?? null;
         }
 
-        return new EmailAddress($from, '', self::TYPE_FROM);
+        return new EmailAddress($from, $fromName, self::TYPE_FROM);
     }
 
     private function validateEmail($email): bool
@@ -137,7 +138,9 @@ class EmailService extends LoggerService
 
     private function saveEmail(EmailAddress $from, $addresses, $subject, $content, $altText, $charset): bool
     {
+        $data = [];
         $data['from'] = [
+            'name'  => $from->getName() ?? null,
             'email' => $from->getEmail(),
             'type'  => $from->getType()
         ];
