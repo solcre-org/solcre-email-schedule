@@ -5,7 +5,7 @@ namespace Solcre\EmailSchedule\Service\Factory;
 use Doctrine\ORM\EntityManager;
 use Interop\Container\ContainerInterface;
 use Solcre\EmailSchedule\Service\ScheduleEmailService;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class ScheduleEmailServiceFactory implements FactoryInterface
 {

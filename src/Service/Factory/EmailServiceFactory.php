@@ -3,11 +3,11 @@
 namespace Solcre\EmailSchedule\Service\Factory;
 
 use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use PHPMailer\PHPMailer\PHPMailer;
 use Solcre\EmailSchedule\Service\EmailService;
 use Solcre\EmailSchedule\Service\ScheduleEmailService;
 use Solcre\EmailSchedule\TemplateService\TwigService;
-use Zend\ServiceManager\Factory\FactoryInterface;
 
 class EmailServiceFactory implements FactoryInterface
 {

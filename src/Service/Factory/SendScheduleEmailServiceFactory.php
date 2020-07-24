@@ -7,7 +7,7 @@ use Interop\Container\ContainerInterface;
 use Solcre\EmailSchedule\Service\EmailService;
 use Solcre\EmailSchedule\Service\ScheduleEmailService;
 use Solcre\EmailSchedule\Service\SendScheduleEmailService;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class SendScheduleEmailServiceFactory implements FactoryInterface
 {

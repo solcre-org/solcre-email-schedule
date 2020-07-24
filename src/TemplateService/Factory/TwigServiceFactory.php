@@ -8,7 +8,7 @@ use Solcre\EmailSchedule\Module;
 use Solcre\EmailSchedule\TemplateService\TwigService;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use Zend\ServiceManager\Factory\FactoryInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class TwigServiceFactory implements FactoryInterface
 {
