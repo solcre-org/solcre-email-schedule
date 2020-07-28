@@ -7,6 +7,7 @@ use PHPMailer\PHPMailer\PHPMailer;
 use Psr\Log\LoggerInterface;
 use Solcre\EmailSchedule\Entity\EmailAddress;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
+use Solcre\EmailSchedule\Entity\SmtpAccount;
 use Solcre\EmailSchedule\Exception\BaseException;
 use Solcre\EmailSchedule\Interfaces\TemplateInterface;
 use Solcre\EmailSchedule\Module;
@@ -19,10 +20,11 @@ class EmailService extends LoggerService
     public const TYPE_BCC = 4;
     public const TYPE_REPLAY_TO = 5;
 
+    private $mailer;
     protected $configuration;
     protected $scheduleEmailService;
     protected $templateService;
-    private $mailer;
+    protected $smtpAccount;
 
     public function __construct(PHPMailer $mailer, $configuration, ScheduleEmailService $scheduleEmailService, TemplateInterface $templateService, ?LoggerInterface $logger)
     {
@@ -31,6 +33,7 @@ class EmailService extends LoggerService
         $this->configuration = $configuration;
         $this->scheduleEmailService = $scheduleEmailService;
         $this->templateService = $templateService;
+        $this->smtpAccount = null;
     }
 
     public function sendTpl(array $vars, $templateName, array $addresses, string $subject, $charset = 'UTF-8', $altText = '', $from = null): ?bool
@@ -217,18 +220,8 @@ class EmailService extends LoggerService
             $this->mailer->Subject = $subject;
             $this->mailer->AltBody = $altText;
             $this->mailer->msgHTML($content);
-            $isSMTP = (boolean)$this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['ACTIVE'];
 
-            if ($isSMTP) {
-                $this->mailer->isSMTP();
-                $this->mailer->SMTPAuth = true;
-                $this->mailer->SMTPDebug = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['DEBUG'];
-                $this->mailer->Host = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['HOST'];
-                $this->mailer->Username = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['USERNAME'];
-                $this->mailer->Password = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PASSWORD'];
-                $this->mailer->Port = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PORT'];
-                $this->mailer->SMTPSecure = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['SECURE'];
-            }
+            $this->setSmtpCredentials();
 
             if (! $this->mailer->send()) {
                 throw new BaseException($this->mailer->ErrorInfo, 400);
@@ -240,5 +233,39 @@ class EmailService extends LoggerService
         } catch (Exception $e) {
             throw new BaseException($e->getMessage(), $e->getCode());
         }
+    }
+
+    private function setSmtpCredentials(): void
+    {
+        if($this->smtpAccount instanceof SmtpAccount)
+        {
+            $this->mailer->isSMTP();
+            $this->mailer->SMTPAuth = true;
+            $this->mailer->SMTPAutoTLS = $this->smtpAccount->getIsTls();
+            $this->mailer->Host = $this->smtpAccount->getHost();
+            $this->mailer->Port = $this->smtpAccount->getPort();
+            $this->mailer->Username = $this->smtpAccount->getUsername();
+            $this->mailer->Password = $this->smtpAccount->getPassword();
+        }
+        else
+        {
+            $isSMTP = (boolean) $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['ACTIVE'];
+            if ($isSMTP)
+            {
+                $this->mailer->isSMTP();
+                $this->mailer->SMTPAuth = true;
+                $this->mailer->SMTPDebug = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['DEBUG'];
+                $this->mailer->Host = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['HOST'];
+                $this->mailer->Username = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['USERNAME'];
+                $this->mailer->Password = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PASSWORD'];
+                $this->mailer->Port = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PORT'];
+                $this->mailer->SMTPSecure = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['SECURE'];
+            }
+        }
+    }
+
+    public function setSmtpAccount(SmtpAccount $smtpAccount): void
+    {
+        $this->smtpAccount = $smtpAccount;
     }
 }
