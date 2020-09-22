@@ -10,9 +10,9 @@ use Solcre\EmailSchedule\Entity\ScheduleEmail;
 
 class SendScheduleEmailService extends LoggerService
 {
-    private $scheduleEmailService;
-    private $emailService;
-    private $entityManager;
+    private ScheduleEmailService $scheduleEmailService;
+    private EmailService $emailService;
+    private EntityManager $entityManager;
 
     public function __construct(EntityManager $entityManager, ScheduleEmailService $scheduleEmailService, EmailService $emailService, ?LoggerInterface $logger)
     {
@@ -25,11 +25,11 @@ class SendScheduleEmailService extends LoggerService
     public function sendScheduledEmails(): bool
     {
         try {
-            $this->entityManager->getConnection()->exec('LOCK TABLES schedule_emails as se WRITE;');
+            $this->entityManager->getConnection()->executeStatement('LOCK TABLES schedule_emails as se WRITE;');
             $scheduledEmailsToSend = $this->scheduleEmailService->fetchAvailableScheduledEmails();
             $result = false;
 
-            if (! empty($scheduledEmailsToSend) && is_array($scheduledEmailsToSend)) {
+            if (! empty($scheduledEmailsToSend) && \is_array($scheduledEmailsToSend)) {
                 $result = $this->markEmailAsSending($scheduledEmailsToSend);
 
                 if ($result) {
@@ -41,7 +41,7 @@ class SendScheduleEmailService extends LoggerService
             }
 
             return $result;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             if ($this->entityManager->isOpen()) {
                 $this->entityManager->flush();
                 $this->entityManager->commit();
@@ -50,7 +50,7 @@ class SendScheduleEmailService extends LoggerService
         }
     }
 
-    private function markEmailAsSending(array &$emailsToSend): ?bool
+    private function markEmailAsSending(array $emailsToSend): ?bool
     {
         $emailsToSendIds = \array_map(
             static function (ScheduleEmail $emailToSend) {
@@ -64,7 +64,7 @@ class SendScheduleEmailService extends LoggerService
         }
         try {
             $result = $this->scheduleEmailService->markEmailAsSending($emailsToSendIds);
-            $this->entityManager->getConnection()->exec('UNLOCK TABLES;');
+            $this->entityManager->getConnection()->executeStatement('UNLOCK TABLES;');
 
             if (! $result) {
                 return false;
@@ -128,7 +128,7 @@ class SendScheduleEmailService extends LoggerService
     private function createAddresses(array $addresses): array
     {
         $addressesToEmail = [];
-        if (! empty($addresses) && is_array($addresses)) {
+        if (! empty($addresses) && \is_array($addresses)) {
             foreach ($addresses as $emailsAddress) {
                 $addressesToEmail[] = new EmailAddress($emailsAddress['email'], $emailsAddress['name'], $emailsAddress['type']);
             }

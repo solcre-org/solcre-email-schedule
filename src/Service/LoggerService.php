@@ -9,7 +9,7 @@ use Solcre\EmailSchedule\Exception\BaseException;
 class LoggerService
 {
     public const LEVELS = ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug', 'log'];
-    private $logger;
+    private ?LoggerInterface $logger;
 
     /**
      * @param LoggerInterface|null $logger

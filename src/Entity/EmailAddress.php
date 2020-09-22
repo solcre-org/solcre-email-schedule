@@ -5,11 +5,11 @@ namespace Solcre\EmailSchedule\Entity;
 class EmailAddress
 {
     /* @var string */
-    private $email;
+    private string $email;
     /* @var string|null */
-    private $name;
+    private ?string $name;
     /* @var int */
-    private $type;
+    private int $type;
 
     /**
      * EmailAddress constructor.

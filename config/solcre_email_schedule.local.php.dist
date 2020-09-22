@@ -4,7 +4,9 @@ return [
     'solcre_email_schedule' => [
         'DEFAULT_FROM_EMAIL' => '',
         'DEFAULT_FROM_NAME_EMAIL' => '',
-        'TEMPLATES_PATH'        => '',
+        'TEMPLATES_PATH'          => [
+                   'EMAILS' => []
+               ],
         'SMTP_CREDENTIALS'   => [
             'ACTIVE'   => 1,
             'HOST'     => '',
@@ -13,6 +15,7 @@ return [
             'PORT'     => '',
             'DEBUG'    => '',
         ],
+        'TEMPLATE_ENGINE'         => null,
         'DEFAULT_VARIABLES' => [
             'ASSETS_PATH'        => '',
         ]

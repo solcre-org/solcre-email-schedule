@@ -38,8 +38,8 @@ class ScheduleEmailRepository extends EntityRepository
         try {
             $date = new DateTime();
             $connection = $this->_em->getConnection();
-            $query = "UPDATE schedule_emails as se SET se.sending_date = :date WHERE se.id IN(" . implode(',', $emailsIds) . ")";
-            $rowAffected = $connection->executeUpdate(
+            $query = 'UPDATE schedule_emails as se SET se.sending_date = :date WHERE se.id IN(' . implode(',', $emailsIds) . ')';
+            $rowAffected = $connection->executeStatement(
                 $query,
                 [
                     'date' => $date->format('Y-m-d H:i:s')
@@ -50,8 +50,8 @@ class ScheduleEmailRepository extends EntityRepository
                 return true;
             }
 
-            $rollBackQuery = "UPDATE schedule_emails as se SET se.sending_date = NULL WHERE se.id IN(" . implode(',', $emailsIds) . ")";
-            $connection->executeUpdate($rollBackQuery);
+            $rollBackQuery = 'UPDATE schedule_emails as se SET se.sending_date = NULL WHERE se.id IN(' . implode(',', $emailsIds) . ')';
+            $connection->executeStatement($rollBackQuery);
 
             return false;
         } catch (Exception $e) {
@@ -63,7 +63,7 @@ class ScheduleEmailRepository extends EntityRepository
     {
         $connection = $this->_em->getConnection();
         $query = 'UPDATE schedule_emails se SET se.sending_date = null WHERE se.send_at IS NULL AND TIMESTAMPDIFF(MINUTE, sending_date, :date) > :minutes';
-        $connection->executeUpdate(
+        $connection->executeStatement(
             $query,
             [
                 'date'    => $delayedTime,

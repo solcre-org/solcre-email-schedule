@@ -17,56 +17,56 @@ class ScheduleEmail
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
-    protected $id;
+    protected int $id;
 
     /**
      * @ORM\Column(type="json", name="email_from")
      */
-    protected $emailFrom;
+    protected array $emailFrom;
 
     /**
      * @ORM\Column(type="json")
      */
-    protected $addresses;
+    protected array $addresses;
 
     /**
      * @ORM\Column(type="string")
      */
-    protected $subject;
+    protected string $subject;
 
     /**
      * @ORM\Column(type="string")
      */
-    protected $charset;
+    protected string $charset;
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected $altText;
+    protected string $altText;
 
     /**
      * @ORM\Column(type="text")
      */
-    protected $content;
+    protected string $content;
 
     /**
      * @ORM\Column(type="datetime", name="send_at", nullable=true)
      */
-    protected $sendAt;
+    protected ?DateTime $sendAt;
     /**
      * @ORM\Column(type="datetime", name="created_at")
      */
-    protected $createdAt;
+    protected DateTime $createdAt;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected $retried;
+    protected int $retried;
 
     /**
      * @ORM\Column(type="datetime", name="sending_date", nullable=true)
      */
-    protected $sendingDate;
+    protected ?DateTime $sendingDate;
 
     /**
      * @return integer

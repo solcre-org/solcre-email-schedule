@@ -12,7 +12,8 @@ return [
             Service\EmailService::class             => Factory\EmailServiceFactory::class,
             Service\ScheduleEmailService::class     => Factory\ScheduleEmailServiceFactory::class,
             Service\SendScheduleEmailService::class => Factory\SendScheduleEmailServiceFactory::class,
-            TemplateService\TwigService::class      => TemplateService\Factory\TwigServiceFactory::class
+            TemplateService\TwigService::class      => TemplateService\Factory\TwigServiceFactory::class,
+            TemplateService\SmartyService::class    => TemplateService\Factory\SmartyServiceFactory::class
         ],
     ],
     'doctrine'        => [

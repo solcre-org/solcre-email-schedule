@@ -3,24 +3,32 @@
 namespace Solcre\EmailSchedule\TemplateService\Factory;
 
 use Interop\Container\ContainerInterface;
+use Laminas\ServiceManager\Factory\FactoryInterface;
 use RuntimeException;
 use Solcre\EmailSchedule\Module;
 use Solcre\EmailSchedule\TemplateService\TwigService;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
-use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class TwigServiceFactory implements FactoryInterface
 {
     public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $configPaths = $container->get('config');
-        if (! isset($configPaths[Module::CONFIG_KEY])) {
+        $paths = $container->get('config')[Module::CONFIG_KEY]['TEMPLATES_PATH']['EMAILS'];
+        $pathsConfirmed = [];
+        foreach ($paths as $path) {
+            if (\is_dir($path)) {
+                $pathsConfirmed[] = $path;
+            }
+        }
+
+        if (empty($pathsConfirmed)) {
             throw new RuntimeException(
-                'No config was found for Solcre Email Schedule. Did you copy the `solcre_email_schedule.local.php` file to your autoload folder?'
+                'You must add directories paths'
             );
         }
-        $loader = new FilesystemLoader($configPaths[Module::CONFIG_KEY]['TEMPLATES_PATH']);
+
+        $loader = new FilesystemLoader($pathsConfirmed);
         $twig = new Environment($loader);
 
         return new TwigService($twig);

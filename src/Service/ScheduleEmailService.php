@@ -13,7 +13,7 @@ class ScheduleEmailService
 {
     private const MAX_RETRIED = 3;
     private const DELAYED_EMAIL_HOUR = 1;
-    private $entityManager;
+    private EntityManager $entityManager;
     private $repository;
 
     public function __construct(EntityManager $entityManager)
@@ -67,11 +67,7 @@ class ScheduleEmailService
     {
         $keysReceived = array_keys($data);
 
-        if ((! count(array_intersect($keys, $keysReceived))) > 0) {
-            return false;
-        }
-
-        return true;
+        return ! ((! \count(array_intersect($keys, $keysReceived))) > 0);
     }
 
     public function patchScheduleEmail(ScheduleEmail $scheduleEmailEntity, array $data): ScheduleEmail
@@ -81,11 +77,11 @@ class ScheduleEmailService
                 return $scheduleEmailEntity;
             }
 
-            if (array_key_exists('sendAt', $data)) {
+            if (\array_key_exists('sendAt', $data)) {
                 $scheduleEmailEntity->setSendAt(new DateTime());
             }
 
-            if (array_key_exists('isSending', $data)) {
+            if (\array_key_exists('isSending', $data)) {
                 $date = null;
 
                 if ($data['isSending']) {
@@ -94,7 +90,7 @@ class ScheduleEmailService
                 $scheduleEmailEntity->setSendingDate($date);
             }
 
-            if (array_key_exists('retried', $data)) {
+            if (\array_key_exists('retried', $data)) {
                 $scheduleEmailEntity->setRetried($data['retried']);
             }
 
