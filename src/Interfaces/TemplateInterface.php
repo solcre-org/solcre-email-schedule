@@ -4,5 +4,5 @@ namespace Solcre\EmailSchedule\Interfaces;
 
 interface TemplateInterface
 {
-    public function render(string $templateName, array $data = []);
+    public function render(string $templateName, array $data = []): string;
 }

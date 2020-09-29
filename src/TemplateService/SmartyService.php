@@ -17,7 +17,7 @@ class SmartyService implements TemplateInterface
         $this->templatePaths = $templatePaths;
     }
 
-    public function render(string $templateName, array $data = []): ?string
+    public function render(string $templateName, array $data = []): string
     {
         foreach ($this->templatePaths as $path) {
             $fullName = $path . $templateName;
@@ -30,6 +30,6 @@ class SmartyService implements TemplateInterface
             }
         }
 
-        return null;
+        return '';
     }
 }

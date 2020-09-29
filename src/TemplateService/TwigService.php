@@ -15,7 +15,7 @@ class TwigService implements TemplateInterface
         $this->twig = $twig;
     }
 
-    public function render(string $templateName, array $data = []): ?string
+    public function render(string $templateName, array $data = []): string
     {
         try {
             return $this->twig->render($templateName . '.twig', $data);
