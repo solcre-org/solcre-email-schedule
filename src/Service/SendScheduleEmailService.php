@@ -2,6 +2,7 @@
 
 namespace Solcre\EmailSchedule\Service;
 
+use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -22,10 +23,31 @@ class SendScheduleEmailService extends LoggerService
         $this->emailService = $emailService;
     }
 
+    private function isMysqlDriver(): bool
+    {
+        return $this->entityManager->getConnection()->getDriver() instanceof Driver;
+    }
+
+    private function lockTable(): void
+    {
+        if ($this->isMysqlDriver()) {
+            $this->entityManager->getConnection()->exec('LOCK TABLES schedule_emails as se WRITE;');
+            return;
+        }
+    }
+
+    private function unlockTable(): void
+    {
+        if ($this->isMysqlDriver()) {
+            $this->entityManager->getConnection()->exec('UNLOCK TABLES;');
+            return;
+        }
+    }
+
     public function sendScheduledEmails(): bool
     {
         try {
-            $this->entityManager->getConnection()->executeStatement('LOCK TABLES schedule_emails as se WRITE;');
+            $this->lockTable();
             $scheduledEmailsToSend = $this->scheduleEmailService->fetchAvailableScheduledEmails();
             $result = false;
 
@@ -64,7 +86,7 @@ class SendScheduleEmailService extends LoggerService
         }
         try {
             $result = $this->scheduleEmailService->markEmailAsSending($emailsToSendIds);
-            $this->entityManager->getConnection()->executeStatement('UNLOCK TABLES;');
+            $this->unlockTable();
 
             if (! $result) {
                 return false;
