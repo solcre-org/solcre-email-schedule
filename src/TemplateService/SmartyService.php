@@ -2,8 +2,8 @@
 
 namespace Solcre\EmailSchedule\TemplateService;
 
+use Exception;
 use Smarty;
-use SmartyException;
 use Solcre\EmailSchedule\Interfaces\TemplateInterface;
 
 class SmartyService implements TemplateInterface
@@ -17,14 +17,24 @@ class SmartyService implements TemplateInterface
         $this->templatePaths = $templatePaths;
     }
 
+    public function assign($data, $key = null): void
+    {
+        if ($key === null) {
+            $key = 'data';
+        }
+
+        $this->smarty->assign($key, $data);
+    }
+
     public function render(string $templateName, array $data = []): string
     {
         foreach ($this->templatePaths as $path) {
             $fullName = $path . $templateName;
             if (\file_exists($fullName)) {
                 try {
-                    return $this->smarty->fetch($fullName, $data);
-                } catch (SmartyException $e) {
+                    $this->assign($data);
+                    return $this->smarty->fetch($fullName);
+                } catch (Exception $e) {
                     throw $e;
                 }
             }

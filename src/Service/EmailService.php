@@ -271,4 +271,12 @@ class EmailService extends LoggerService
     {
         $this->smtpAccount = $smtpAccount;
     }
+
+    /**
+     * @return TemplateInterface
+     */
+    public function getTemplateService(): TemplateInterface
+    {
+        return $this->templateService;
+    }
 }
