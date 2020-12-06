@@ -31,7 +31,11 @@ class SendScheduleEmailService extends LoggerService
     private function lockTable(): void
     {
         if ($this->isMysqlDriver()) {
-            $this->entityManager->getConnection()->exec('LOCK TABLES schedule_emails as se WRITE;');
+            try {
+                $this->entityManager->getConnection()->executeStatement('LOCK TABLES schedule_emails as se WRITE;');
+            } catch (\Doctrine\DBAL\Exception $e) {
+                throw $e;
+            }
             return;
         }
     }
@@ -39,7 +43,11 @@ class SendScheduleEmailService extends LoggerService
     private function unlockTable(): void
     {
         if ($this->isMysqlDriver()) {
-            $this->entityManager->getConnection()->exec('UNLOCK TABLES;');
+            try {
+                $this->entityManager->getConnection()->executeStatement('UNLOCK TABLES;');
+            } catch (\Doctrine\DBAL\Exception $e) {
+                throw $e;
+            }
             return;
         }
     }
@@ -62,6 +70,7 @@ class SendScheduleEmailService extends LoggerService
                 }
             }
 
+            $this->unlockTable();
             return $result;
         } catch (Exception $e) {
             if ($this->entityManager->isOpen()) {
@@ -84,6 +93,7 @@ class SendScheduleEmailService extends LoggerService
         if (empty($emailsToSendIds)) {
             return false;
         }
+
         try {
             $result = $this->scheduleEmailService->markEmailAsSending($emailsToSendIds);
             $this->unlockTable();
