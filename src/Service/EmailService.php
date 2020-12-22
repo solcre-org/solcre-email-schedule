@@ -41,16 +41,11 @@ class EmailService extends LoggerService
     public function sendTpl(array $vars, $templateName, array $addresses, string $subject, $charset = 'UTF-8', $altText = '', $from = null): ?bool
     {
         try {
-            $from = $this->getFromEmail($from);
-            $addresses = $this->generateAddresses($addresses);
+            $scheduleEmail = $this->saveEmail($vars, $templateName, $addresses, $subject, $charset, $altText, $from);
+            $from = $this->getFromEmail($scheduleEmail->getEmailFrom());
+            $addresses = $this->generateAddresses($scheduleEmail->getAddresses());
 
-            if (empty($addresses)) {
-                throw new BaseException('Addresses must not be empty', 422);
-            }
-
-            $content = $this->getRenderTemplate($vars, $templateName);
-
-            return $this->sendOrSaveEmail($from, $addresses, $content, $charset, $subject, $altText);
+            return $this->send($from, $addresses, $scheduleEmail->getContent(), $scheduleEmail->getCharset(), $scheduleEmail->getSubject(), $scheduleEmail->getAltText());
         } catch (Exception $e) {
             $this->logMessage($e, ['EMAIL-SERVICE-SEND-TPL']);
             unset($e);
@@ -117,6 +112,7 @@ class EmailService extends LoggerService
     private function mergeDefaultVariables(array $data = []): array
     {
         $defaultVariables = $this->getDefaultVariables();
+
         if (! empty($data)) {
             return \array_merge($defaultVariables, $data);
         }
@@ -128,26 +124,17 @@ class EmailService extends LoggerService
         return $this->configuration[Module::CONFIG_KEY]['DEFAULT_VARIABLES'];
     }
 
-    private function sendOrSaveEmail(EmailAddress $from, array $addresses, string $content, string $charset, string $subject, $altText = ''): ?bool
+    public function saveEmail(array $vars, $templateName, array $addresses, string $subject, $charset = 'UTF-8', $altText = '', $from = null): ScheduleEmail
     {
-        try {
-            $isSaved = $this->saveEmail($from, $addresses, $subject, $content, $altText, $charset);
+        $from = $this->getFromEmail($from);
+        $addresses = $this->generateAddresses($addresses);
 
-            if (! $isSaved) {
-                return $this->send($from, $addresses, $subject, $content, $altText, $charset);
-            }
-
-            return true;
-        } catch (Exception $e) {
-            $this->logMessage($e, ['EMAIl-SERVICE-SEND-OR-SAVE-EMAIL']);
-            unset($e);
-
-            return $this->send($from, $addresses, $subject, $content, $altText, $charset);
+        if (empty($addresses)) {
+            throw new BaseException('Addresses must not be empty', 422);
         }
-    }
 
-    private function saveEmail(EmailAddress $from, $addresses, $subject, $content, $altText, $charset): bool
-    {
+        $content = $this->getRenderTemplate($vars, $templateName);
+
         $data = [];
         $data['from'] = [
             'name'  => $from->getName(),
@@ -195,9 +182,7 @@ class EmailService extends LoggerService
             }
         }
 
-        $scheduleEntity = $this->scheduleEmailService->add($data);
-
-        return $scheduleEntity instanceof ScheduleEmail;
+        return $this->scheduleEmailService->add($data);
     }
 
     public function send(EmailAddress $from, array $addresses, string $subject, string $content, string $charset = PHPMailer::CHARSET_UTF8, $altText = 'To view the message, please use an HTML compatible email viewer!'): ?bool
