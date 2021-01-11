@@ -127,6 +127,10 @@ class EmailService extends LoggerService
     public function saveEmail(array $vars, $templateName, array $addresses, string $subject, $charset = 'UTF-8', $altText = '', $from = null): ScheduleEmail
     {
         $from = $this->getFromEmail($from);
+        if ($from === null) {
+            throw new BaseException('From must not be empty', 422);
+        }
+
         $addresses = $this->generateAddresses($addresses);
 
         if (empty($addresses)) {
