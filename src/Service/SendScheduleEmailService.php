@@ -8,6 +8,8 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Solcre\EmailSchedule\Entity\EmailAddress;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
+use function array_map;
+use function is_array;
 
 class SendScheduleEmailService extends LoggerService
 {
@@ -18,9 +20,9 @@ class SendScheduleEmailService extends LoggerService
     public function __construct(EntityManager $entityManager, ScheduleEmailService $scheduleEmailService, EmailService $emailService, ?LoggerInterface $logger)
     {
         parent::__construct($logger);
-        $this->entityManager = $entityManager;
+        $this->entityManager        = $entityManager;
         $this->scheduleEmailService = $scheduleEmailService;
-        $this->emailService = $emailService;
+        $this->emailService         = $emailService;
     }
 
     private function isMysqlDriver(): bool
@@ -28,6 +30,9 @@ class SendScheduleEmailService extends LoggerService
         return $this->entityManager->getConnection()->getDriver() instanceof Driver;
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     private function lockTable(): void
     {
         if ($this->isMysqlDriver()) {
@@ -36,10 +41,12 @@ class SendScheduleEmailService extends LoggerService
             } catch (\Doctrine\DBAL\Exception $e) {
                 throw $e;
             }
-            return;
         }
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     private function unlockTable(): void
     {
         if ($this->isMysqlDriver()) {
@@ -48,18 +55,25 @@ class SendScheduleEmailService extends LoggerService
             } catch (\Doctrine\DBAL\Exception $e) {
                 throw $e;
             }
-            return;
         }
     }
 
+    /**
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     * @throws \Doctrine\DBAL\Exception
+     */
+    /**
+     */
     public function sendScheduledEmails(): bool
     {
         try {
             $this->lockTable();
             $scheduledEmailsToSend = $this->scheduleEmailService->fetchAvailableScheduledEmails();
-            $result = false;
+            $result                = false;
 
-            if (! empty($scheduledEmailsToSend) && \is_array($scheduledEmailsToSend)) {
+            if (! empty($scheduledEmailsToSend) && is_array($scheduledEmailsToSend)) {
                 $result = $this->markEmailAsSending($scheduledEmailsToSend);
 
                 if ($result) {
@@ -81,9 +95,13 @@ class SendScheduleEmailService extends LoggerService
         }
     }
 
+    /**
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\DBAL\Exception
+     */
     private function markEmailAsSending(array $emailsToSend): ?bool
     {
-        $emailsToSendIds = \array_map(
+        $emailsToSendIds = array_map(
             static function (ScheduleEmail $emailToSend) {
                 return $emailToSend->getId();
             },
@@ -112,6 +130,9 @@ class SendScheduleEmailService extends LoggerService
         }
     }
 
+    /**
+     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     */
     private function processEmails(array $emailsToSend): ?bool
     {
         $resultSend = false;
@@ -124,7 +145,7 @@ class SendScheduleEmailService extends LoggerService
                     continue;
                 }
 
-                $from = $this->createEmailFrom($scheduleEmail->getEmailFrom());
+                $from       = $this->createEmailFrom($scheduleEmail->getEmailFrom());
                 $resultSend = $this->sendEmail($from, $addressesToEmail, $scheduleEmail);
 
                 $dataToPatch = [];
@@ -160,7 +181,7 @@ class SendScheduleEmailService extends LoggerService
     private function createAddresses(array $addresses): array
     {
         $addressesToEmail = [];
-        if (! empty($addresses) && \is_array($addresses)) {
+        if (! empty($addresses) && is_array($addresses)) {
             foreach ($addresses as $emailsAddress) {
                 $addressesToEmail[] = new EmailAddress($emailsAddress['email'], $emailsAddress['name'], $emailsAddress['type']);
             }

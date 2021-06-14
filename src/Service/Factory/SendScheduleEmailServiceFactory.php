@@ -11,7 +11,7 @@ use Laminas\ServiceManager\Factory\FactoryInterface;
 
 class SendScheduleEmailServiceFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): SendScheduleEmailService
     {
         $doctrineService = $container->get(EntityManager::class);
         $scheduleEmailService = $container->get(ScheduleEmailService::class);

@@ -15,7 +15,7 @@ use Solcre\EmailSchedule\TemplateService\TwigService;
 
 class EmailServiceFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): EmailService
     {
         $mailer = new PHPMailer();
         $configuration = $container->get('config');

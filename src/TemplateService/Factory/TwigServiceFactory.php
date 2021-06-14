@@ -9,15 +9,16 @@ use Solcre\EmailSchedule\Module;
 use Solcre\EmailSchedule\TemplateService\TwigService;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
+use function is_dir;
 
 class TwigServiceFactory implements FactoryInterface
 {
-    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null): TwigService
     {
         $paths = $container->get('config')[Module::CONFIG_KEY]['TEMPLATES_PATH']['EMAILS'];
         $pathsConfirmed = [];
         foreach ($paths as $path) {
-            if (\is_dir($path)) {
+            if (is_dir($path)) {
                 $pathsConfirmed[] = $path;
             }
         }

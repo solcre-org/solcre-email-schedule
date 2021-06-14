@@ -15,6 +15,12 @@ class TwigService implements TemplateInterface
         $this->twig = $twig;
     }
 
+    /**
+     * @throws \Twig\Error\Error
+     * @throws \Twig\Error\SyntaxError
+     * @throws \Twig\Error\RuntimeError
+     * @throws \Twig\Error\LoaderError
+     */
     public function render(string $templateName, array $data = []): string
     {
         try {

@@ -11,6 +11,9 @@ use Solcre\EmailSchedule\Entity\SmtpAccount;
 use Solcre\EmailSchedule\Exception\BaseException;
 use Solcre\EmailSchedule\Interfaces\TemplateInterface;
 use Solcre\EmailSchedule\Module;
+use function array_merge;
+use function in_array;
+use function is_array;
 
 class EmailService extends LoggerService
 {
@@ -78,7 +81,7 @@ class EmailService extends LoggerService
                 continue;
             }
 
-            if (\is_array($address)) {
+            if (is_array($address)) {
                 $email = $address['email'] ?? null;
                 $type = $address['type'] ?? null;
                 $name = $address['name'] ?? null;
@@ -101,7 +104,7 @@ class EmailService extends LoggerService
             self::TYPE_REPLAY_TO
         ];
 
-        return \in_array($type, $types, true);
+        return in_array($type, $types, true);
     }
 
     private function getRenderTemplate(array $data, string $templatePath): string
@@ -114,7 +117,7 @@ class EmailService extends LoggerService
         $defaultVariables = $this->getDefaultVariables();
 
         if (! empty($data)) {
-            return \array_merge($defaultVariables, $data);
+            return array_merge($defaultVariables, $data);
         }
         return $defaultVariables;
     }
@@ -124,6 +127,14 @@ class EmailService extends LoggerService
         return $this->configuration[Module::CONFIG_KEY]['DEFAULT_VARIABLES'];
     }
 
+    /**
+     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     */
+    /**
+     */
+    /**
+     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     */
     public function saveEmail(array $vars, $templateName, array $addresses, string $subject, $charset = 'UTF-8', $altText = '', $from = null): ScheduleEmail
     {
         $from = $this->getFromEmail($from);
@@ -189,6 +200,9 @@ class EmailService extends LoggerService
         return $this->scheduleEmailService->add($data);
     }
 
+    /**
+     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     */
     public function send(EmailAddress $from, array $addresses, string $subject, string $content, string $charset = PHPMailer::CHARSET_UTF8, $altText = 'To view the message, please use an HTML compatible email viewer!'): ?bool
     {
         try {
