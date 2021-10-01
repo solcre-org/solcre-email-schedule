@@ -58,7 +58,7 @@ class ScheduleEmailRepository extends EntityRepository
             $connection = $this->_em->getConnection();
             $query      = 'UPDATE schedule_emails as se SET se.sending_date = :date WHERE se.id IN(' . implode(',', $emailsIds) . ')';
             if ($this->isSqlDriver()) {
-                $query = "UPDATE schedule_emails  SET schedule_emails.sending_date = :date WHERE schedule_emails.id IN(" . implode(',', $emailsIds) . ")";
+                $query = 'UPDATE schedule_emails  SET schedule_emails.sending_date = :date WHERE schedule_emails.id IN(' . implode(',', $emailsIds) . ')';
             }
             $rowAffected = $connection->executeStatement(
                 $query,
@@ -73,7 +73,7 @@ class ScheduleEmailRepository extends EntityRepository
 
             $rollBackQuery = 'UPDATE schedule_emails as se SET se.sending_date = NULL WHERE se.id IN(' . implode(',', $emailsIds) . ')';
             if ($this->isSqlDriver()) {
-                $rollBackQuery = "UPDATE schedule_emails SET schedule_emails.sending_date = NULL WHERE schedule_emails.id IN(" . implode(',', $emailsIds) . ")";
+                $rollBackQuery = 'UPDATE schedule_emails SET schedule_emails.sending_date = NULL WHERE schedule_emails.id IN(' . implode(',', $emailsIds) . ')';
             }
 
             $connection->executeStatement($rollBackQuery);

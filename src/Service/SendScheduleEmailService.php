@@ -181,7 +181,7 @@ class SendScheduleEmailService extends LoggerService
     private function createAddresses(array $addresses): array
     {
         $addressesToEmail = [];
-        if (! empty($addresses) && is_array($addresses)) {
+        if (\count($addresses) > 0) {
             foreach ($addresses as $emailsAddress) {
                 $addressesToEmail[] = new EmailAddress($emailsAddress['email'], $emailsAddress['name'], $emailsAddress['type']);
             }
@@ -195,7 +195,7 @@ class SendScheduleEmailService extends LoggerService
         return new EmailAddress($fromEmail['email'], $fromEmail['name'] ?? null, $fromEmail['type']);
     }
 
-    private function sendEmail(EmailAddress $from, array $addressesToEmail, ScheduleEmail $scheduleEmail)
+    private function sendEmail(EmailAddress $from, array $addressesToEmail, ScheduleEmail $scheduleEmail): ?bool
     {
         try {
             return $this->emailService->send(

@@ -11,11 +11,11 @@
   "license": "BSD-3-Clause",
   "require": {
     "php": "^7.4",
-    "doctrine/doctrine-orm-module": "^3.0",
-    "phpmailer/phpmailer": "^6.1",
+    "doctrine/doctrine-orm-module": "^4.0",
+    "phpmailer/phpmailer": "^6.5",
     "twig/twig": "^3.0",
     "laminas/laminas-servicemanager": "^3.4",
-    "psr/log": "^1.1",
+    "psr/log": "^1.0",
     "smarty/smarty": "^3.1"
   },
   "require-dev": {
