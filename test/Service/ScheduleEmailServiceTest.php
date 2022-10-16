@@ -1,6 +1,6 @@
 <?php
 
-namespace SolcreFrameworkTest;
+namespace EmailScheduleTest\Service;
 
 use PHPUnit\Framework\TestCase;
 use Doctrine\ORM\EntityManager;

@@ -1,7 +1,9 @@
 <?php
 
-namespace SolcreFrameworkTest;
+namespace EmailScheduleTest\Service;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\AbstractMySQLDriver;
 use PHPUnit\Framework\TestCase;
 use Doctrine\ORM\EntityManager;
 use Exception;
@@ -47,14 +49,26 @@ class SendScheduleEmailServiceTest extends TestCase
             ->onlyMethods(['getConnection'])
             ->getMock();
 
-        $returnTrue = new class() {
-            public function exec()
-            {
-                return true;
-            }
-        };
+//        $returnTrue = new class() {
+//            public function exec()
+//            {
+//                return true;
+//            }
+//        };
 
-        $mockedEntityManager->method('getConnection')->willReturn($returnTrue);
+        $mockedConnection = $this->getMockBuilder(Connection::class)
+            ->disableOriginalConstructor()
+            ->onlyMethods(['getDriver'])
+            ->getMock();
+
+
+        $mockedDriver = $this->getMockBuilder(AbstractMySQLDriver::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $mockedEntityManager->method('getConnection')->willReturn($mockedConnection);
+        $mockedConnection->method('getDriver')->willReturn($mockedDriver);
+
 
         $scheduleEmailService = $this->getMockBuilder(ScheduleEmailService::class)
             ->disableOriginalConstructor()
@@ -78,6 +92,6 @@ class SendScheduleEmailServiceTest extends TestCase
     {
         $sendScheduleEmailService = $this->setupWithoutEmailsToSend();
 
-        $this->assertEquals($sendScheduleEmailService->sendScheduledEmails(), ['success' => false]);
+        $this->assertEquals($sendScheduleEmailService->sendScheduledEmails(), false);
     }
 }

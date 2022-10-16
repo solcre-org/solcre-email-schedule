@@ -1,6 +1,6 @@
 <?php
 
-namespace SolcreFrameworkTest;
+namespace EmailScheduleTest\Service;
 
 use Doctrine\ORM\EntityManager;
 use PHPMailer\PHPMailer\PHPMailer;

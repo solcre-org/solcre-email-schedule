@@ -1,6 +1,6 @@
 <?php
 
-namespace SolcreFrameworkTest;
+namespace EmailScheduleTest\Entity;
 
 use PHPUnit\Framework\TestCase;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
