@@ -10,8 +10,8 @@
   ],
   "license": "BSD-3-Clause",
   "require": {
-    "php": "8.0.3",
-    "doctrine/doctrine-orm-module": "^5.2",
+    "php": "^8.2",
+    "doctrine/doctrine-orm-module": "^6.0",
     "twig/twig": "^3.4",
     "laminas/laminas-servicemanager": "^3.19",
     "smarty/smarty": "^4.2",
@@ -20,7 +20,7 @@
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest",
-    "phpunit/phpunit": "^9.5",
+    "phpunit/phpunit": "^10",
     "friendsofphp/php-cs-fixer": "^3.12"
   },
   "autoload": {
