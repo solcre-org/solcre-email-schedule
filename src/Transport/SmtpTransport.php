@@ -3,6 +3,7 @@
 namespace Solcre\EmailSchedule\Transport;
 
 use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use Solcre\EmailSchedule\Exception\BaseException;
 use Solcre\EmailSchedule\Interfaces\TransportInterface;
@@ -71,16 +72,21 @@ class SmtpTransport implements TransportInterface
 
     private function setSmtpCredentials(): void
     {
-        $isSMTP = (bool)$this->configuration[Module::CONFIG_KEY]['transport']['smtp']['ACTIVE'];
+        $configuration = $this->configuration[Module::CONFIG_KEY]['transport']['smtp'];
+        $isSMTP = (bool)$configuration['ACTIVE'];
+
         if ($isSMTP) {
             $this->mailer->isSMTP();
             $this->mailer->SMTPAuth = true;
-            $this->mailer->SMTPDebug = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['DEBUG'];
-            $this->mailer->Host = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['HOST'];
-            $this->mailer->Username = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['USERNAME'];
-            $this->mailer->Password = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PASSWORD'];
-            $this->mailer->Port = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['PORT'];
-            $this->mailer->SMTPSecure = $this->configuration[Module::CONFIG_KEY]['SMTP_CREDENTIALS']['SECURE'];
+            $this->mailer->SMTPDebug = SMTP::DEBUG_OFF;
+            if ((bool)$configuration['DEBUG'] === 1) {
+                $this->mailer->SMTPDebug = SMTP::DEBUG_SERVER;
+            }
+            $this->mailer->Host = $configuration['HOST'];
+            $this->mailer->Username = $configuration['USERNAME'];
+            $this->mailer->Password = $configuration['PASSWORD'];
+            $this->mailer->Port = $configuration['PORT'];
+            $this->mailer->SMTPSecure = $configuration['SECURE'];
         }
     }
 

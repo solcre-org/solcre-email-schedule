@@ -89,7 +89,11 @@ class ScheduleEmail
      */
     public function getAddresses(): array
     {
-        return $this->addresses;
+        foreach ($this->addresses as $address) {
+            $addresses[] = new EmailAddress($address['email'], $address['name'], $address['type']);
+        }
+
+        return $addresses;
     }
 
     /**

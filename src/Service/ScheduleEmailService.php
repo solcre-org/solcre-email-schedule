@@ -6,6 +6,7 @@ use DateTime;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use InvalidArgumentException;
+use Solcre\EmailSchedule\Entity\EmailAddress;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use Solcre\EmailSchedule\Exception\BaseException;
 use function array_key_exists;
@@ -35,7 +36,7 @@ class ScheduleEmailService
 
             $scheduleEmail = new ScheduleEmail();
             $scheduleEmail->setCharset($data['charset'] ?? 'UTF-8');
-            $scheduleEmail->setAddresses($data['addresses']);
+            $scheduleEmail->setAddresses($this->normalizeAddresses($data['addresses']));
             $scheduleEmail->setAltText($data['altText']);
             $scheduleEmail->setContent($data['content']);
             $scheduleEmail->setCreatedAt(new DateTime());
@@ -51,6 +52,22 @@ class ScheduleEmailService
         } catch (Exception $exception) {
             throw new BaseException('Error creating schedule email', $exception->getCode());
         }
+    }
+
+    private function normalizeAddresses(array $addresses): array
+    {
+        $normalized = [];
+
+        /* @var EmailAddress $address */
+        foreach ($addresses as $address) {
+            $normalized[] = [
+                'email' => $address->getEmail(),
+                'name'  => $address->getName(),
+                'type'  => $address->getType(),
+            ];
+        }
+
+        return $normalized;
     }
 
     private function validateData(array $data): void
