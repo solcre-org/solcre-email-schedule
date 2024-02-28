@@ -5,6 +5,7 @@ namespace Solcre\EmailSchedule;
 use Solcre\EmailSchedule\Service;
 use Solcre\EmailSchedule\Service\Factory;
 use Solcre\EmailSchedule\TemplateService;
+use Solcre\EmailSchedule\Transport;
 
 return [
     'service_manager' => [
@@ -13,7 +14,9 @@ return [
             Service\ScheduleEmailService::class     => Factory\ScheduleEmailServiceFactory::class,
             Service\SendScheduleEmailService::class => Factory\SendScheduleEmailServiceFactory::class,
             TemplateService\TwigService::class      => TemplateService\Factory\TwigServiceFactory::class,
-            TemplateService\SmartyService::class    => TemplateService\Factory\SmartyServiceFactory::class
+            TemplateService\SmartyService::class    => TemplateService\Factory\SmartyServiceFactory::class,
+            Transport\AwsSqsTransport::class        => Transport\Factory\AwsSqsTransportFactory::class,
+            Transport\SmtpTransport::class          => Transport\Factory\SmtpTransportFactory::class,
         ],
     ],
     'doctrine'        => [

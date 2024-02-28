@@ -17,56 +17,56 @@ class ScheduleEmail
      * @ORM\GeneratedValue(strategy="AUTO")
      * @ORM\Column(type="integer")
      */
-    protected int $id;
+    private int $id;
 
     /**
      * @ORM\Column(type="json", name="email_from")
      */
-    protected array $emailFrom;
+    private array $emailFrom;
 
     /**
      * @ORM\Column(type="json")
      */
-    protected array $addresses;
+    private array $addresses;
 
     /**
      * @ORM\Column(type="string")
      */
-    protected string $subject;
+    private string $subject;
 
     /**
      * @ORM\Column(type="string")
      */
-    protected string $charset;
+    private string $charset;
 
     /**
      * @ORM\Column(type="string", nullable=true)
      */
-    protected string $altText;
+    private string $altText;
 
     /**
      * @ORM\Column(type="text")
      */
-    protected string $content;
+    private string $content;
 
     /**
      * @ORM\Column(type="datetime", name="send_at", nullable=true)
      */
-    protected ?DateTime $sendAt;
+    private ?DateTime $sendAt;
     /**
      * @ORM\Column(type="datetime", name="created_at")
      */
-    protected DateTime $createdAt;
+    private DateTime $createdAt;
 
     /**
      * @ORM\Column(type="integer")
      */
-    protected int $retried;
+    private int $retried;
 
     /**
      * @ORM\Column(type="datetime", name="sending_date", nullable=true)
      */
-    protected ?DateTime $sendingDate;
+    private ?DateTime $sendingDate;
 
     /**
      * @return integer
@@ -85,7 +85,7 @@ class ScheduleEmail
     }
 
     /**
-     * @return array
+     * @return EmailAddress[]
      */
     public function getAddresses(): array
     {
