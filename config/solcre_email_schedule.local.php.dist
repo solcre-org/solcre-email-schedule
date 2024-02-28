@@ -2,31 +2,32 @@
 
 return [
     'solcre_email_schedule' => [
-        'transport'=> [
-                'driver' => 'smtp'
-                'smtp' => [
-                                      'ACTIVE'   => 1,
-                                      'HOST'     => '',
-                                      'USERNAME' => '',
-                                      'PASSWORD' => '',
-                                      'PORT'     => '',
-                                      'DEBUG'    => '',
-                                  ],
-                'aws-sqs' => [
-                    'key' => 'your-aws-access-key',
-                    'secret' => 'your-aws-secret-key',
-                    'region' => 'your-aws-region',
-                    'url' => 'your-aws-sqs-url',
-                ],
+        'transport'               => [
+            'driver'  => 'smtp',
+            'smtp'    => [
+                'ACTIVE'   => 1,
+                'HOST'     => '',
+                'USERNAME' => '',
+                'PASSWORD' => '',
+                'PORT'     => '',
+                'DEBUG'      => '0',
+                'SECURE' => 'tls',
+            ],
+            'aws-sqs' => [
+                'key'    => 'your-aws-access-key',
+                'secret' => 'your-aws-secret-key',
+                'region' => 'your-aws-region',
+                'url'    => 'your-aws-sqs-url',
+            ],
         ],
-        'DEFAULT_FROM_EMAIL' => '',
+        'DEFAULT_FROM_EMAIL'      => '',
         'DEFAULT_FROM_NAME_EMAIL' => '',
         'TEMPLATES_PATH'          => [
-                   'EMAILS' => []
-               ],
+            'EMAILS' => []
+        ],
         'TEMPLATE_ENGINE'         => null,
-        'DEFAULT_VARIABLES' => [
-            'ASSETS_PATH'        => '',
+        'DEFAULT_VARIABLES'       => [
+            'ASSETS_PATH' => '',
         ]
     ]
 ];

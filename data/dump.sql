@@ -8,7 +8,7 @@ CREATE TABLE `schedule_emails`
 (
     `id`           int(11)      NOT NULL AUTO_INCREMENT,
     `email_from`   text         NOT NULL,
-    `addresses`    text         NOT NULL,
+    `addresses`    json         NOT NULL,
     `charset`      varchar(255) NOT NULL,
     `subject`      varchar(255) NOT NULL,
     `altText`      varchar(255) DEFAULT NULL,

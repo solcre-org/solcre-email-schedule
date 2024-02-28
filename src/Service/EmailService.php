@@ -53,8 +53,6 @@ class EmailService extends LoggerService
         string       $subject,
         EmailAddress $from): ScheduleEmail
     {
-        $addresses = $this->generateAddresses($addresses);
-
         if (empty($addresses)) {
             throw new BaseException('Addresses must not be empty', 422);
         }
@@ -68,6 +66,7 @@ class EmailService extends LoggerService
             'type'  => $from->getType()
         ];
         $data['content'] = $content;
+        $data['addresses'] = $addresses;
         $data['charset'] = 'utf-8';
         $data['subject'] = $subject;
         $data['altText'] = $altText ?? 'To view the message, please use an HTML compatible email viewer!';

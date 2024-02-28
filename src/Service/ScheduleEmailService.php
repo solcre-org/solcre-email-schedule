@@ -14,7 +14,7 @@ use function sprintf;
 
 class ScheduleEmailService
 {
-    private const MAX_RETRIED        = 3;
+    private const MAX_RETRIED = 3;
     private const DELAYED_EMAIL_HOUR = 1;
     private EntityManager $entityManager;
     private $repository;
@@ -22,7 +22,7 @@ class ScheduleEmailService
     public function __construct(EntityManager $entityManager)
     {
         $this->entityManager = $entityManager;
-        $this->repository    = $this->entityManager->getRepository(ScheduleEmail::class);
+        $this->repository = $this->entityManager->getRepository(ScheduleEmail::class);
     }
 
     /**
@@ -57,21 +57,21 @@ class ScheduleEmailService
     {
         $required = ['content', 'subject', 'altText', 'addresses', 'from'];
 
-        if (! $this->arrayKeysExists($required, $data)) {
+        if (!$this->arrayKeysExists($required, $data)) {
             throw new InvalidArgumentException('Invalid data provided', 422);
         }
     }
 
     private function arrayKeysExists(array $keys, array $arr): bool
     {
-        return ! array_diff_key(array_flip($keys), $arr);
+        return !array_diff_key(array_flip($keys), $arr);
     }
 
     public function anyArrayKeyExist(array $keys, array $data): bool
     {
         $keysReceived = array_keys($data);
 
-        return ! ((! count(array_intersect($keys, $keysReceived))) > 0);
+        return !((!count(array_intersect($keys, $keysReceived))) > 0);
     }
 
     /**
@@ -80,7 +80,7 @@ class ScheduleEmailService
     public function patchScheduleEmail(ScheduleEmail $scheduleEmailEntity, array $data): ScheduleEmail
     {
         try {
-            if (! $this->anyArraykeyExist(['sendAt', 'isSending', 'retried'], $data)) {
+            if (!$this->anyArraykeyExist(['sendAt', 'isSending', 'retried'], $data)) {
                 return $scheduleEmailEntity;
             }
 
@@ -166,7 +166,7 @@ class ScheduleEmailService
     {
         try {
             $delayedTime = new DateTime();
-            $hourPast    = sprintf('- %s hour', self::DELAYED_EMAIL_HOUR);
+            $hourPast = sprintf('- %s hour', self::DELAYED_EMAIL_HOUR);
             $delayedTime->modify($hourPast);
             $delayedMinutes = self::DELAYED_EMAIL_HOUR * 60;
 
