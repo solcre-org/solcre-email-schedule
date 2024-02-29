@@ -110,7 +110,7 @@ class AwsSqsTransport implements TransportInterface
         $params = [
             'MessageBody'               => \json_encode($data),
             'QueueUrl'                  => $this->QueueUrl,
-            'MessageGroupId'            => 'Intranet - ' . $scheduleEmail->getId(),
+            'MessageGroupId'            => 'Message-' . $scheduleEmail->getId(),
             'ContentBasedDeduplication' => true,
         ];
 
