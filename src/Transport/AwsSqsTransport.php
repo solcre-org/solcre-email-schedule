@@ -7,17 +7,19 @@ use Aws\Exception\AwsException;
 use Aws\Result;
 use Aws\Ses\SesClient;
 use Aws\Sqs\SqsClient;
+use Solcre\EmailSchedule\Entity\EmailAddress;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use Solcre\EmailSchedule\Exception\BaseException;
+use Solcre\EmailSchedule\Interfaces\TransportInterface;
 use Solcre\EmailSchedule\Service\EmailService;
 
-class AwsSqsTransport
+class AwsSqsTransport implements TransportInterface
 {
     private Credentials $credentials;
     private string $QueueUrl;
     private string $region;
 
-    public function __construct(array $credentials, string $QueueUrl, string $region = 'us-east-1')
+    public function __construct(array $credentials, string $QueueUrl, string $region)
     {
         $this->credentials = new Credentials($credentials['key'], $credentials['secret']);
         $this->QueueUrl = $QueueUrl;
@@ -58,19 +60,20 @@ class AwsSqsTransport
         $addresses = $scheduleEmail->getAddresses();
 
         foreach ($addresses as $address) {
-            switch ($address['type']) {
+            $email = $address->getEmail();
+            switch ($address->getType()) {
                 case EmailService::TYPE_CC:
-                    $ccAddresses[] = $address['email'];
+                    $ccAddresses[] = $email;
                     break;
                 case EmailService::TYPE_BCC:
-                    $bccAddresses[] = $address['email'];
+                    $bccAddresses[] = $email;
                     break;
                 case EmailService::TYPE_REPLAY_TO:
-                    $replyToAddresses[] = $address['email'];
+                    $replyToAddresses[] = $email;
                     break;
                 case EmailService::TYPE_TO:
                 default:
-                    $toAddresses[] = $address['email'];
+                    $toAddresses[] = $email;
                     break;
             }
         }
@@ -107,7 +110,7 @@ class AwsSqsTransport
         $params = [
             'MessageBody'               => \json_encode($data),
             'QueueUrl'                  => $this->QueueUrl,
-            'MessageGroupId'            => $scheduleEmail->getId(),
+            'MessageGroupId'            => 'Intranet - ' . $scheduleEmail->getId(),
             'ContentBasedDeduplication' => true,
         ];
 

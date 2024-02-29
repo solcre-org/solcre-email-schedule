@@ -41,7 +41,7 @@ class EmailServiceFactory implements FactoryInterface
     {
         $config = $container->get('config')[Module::CONFIG_KEY]['transport'];
 
-        if ($config['driver'] === 'ses') {
+        if ($config['driver'] === 'aws-sqs') {
             return $container->get(AwsSqsTransport::class);
         } elseif ($config['driver'] === 'smtp') {
             return $container->get(SmtpTransport::class);

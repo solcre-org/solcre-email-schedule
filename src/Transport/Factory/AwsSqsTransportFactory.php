@@ -23,6 +23,6 @@ class AwsSqsTransportFactory implements FactoryInterface
         return new AwsSqsTransport(
             $credentials,
             $credentials['url'],
-            $credentials['region'] ?? null);
+            $credentials['region'] ?? 'us-east-1');
     }
 }
