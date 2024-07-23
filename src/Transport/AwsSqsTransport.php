@@ -92,40 +92,44 @@ class AwsSqsTransport implements TransportInterface
             throw new BaseException('Debe enviar un destinatario', 400);
         }
 
-        $data = [
-            'toAddresses'      => $toAddresses,
-            'ccAddresses'      => $ccAddresses,
-            'bccAddresses'     => $bccAddresses,
-            'replyToAddresses' => $replyToAddresses,
-            'subject'          => $scheduleEmail->getSubject(),
-            'body'             => $scheduleEmail->getContent(),
-        ];
-
-
         $fromEmail = $scheduleEmail->getEmailFrom()['email'];
         if ($this->isEmailVerified($fromEmail)) {
             $data['from'] = $fromEmail;
         }
 
-        $params = [
-            'MessageBody'               => \json_encode($data),
-            'QueueUrl'                  => $this->QueueUrl,
-            'MessageGroupId'            => 'Message-' . $scheduleEmail->getId(),
-            'ContentBasedDeduplication' => true,
+        $baseData = [
+            'ccAddresses'      => $ccAddresses,
+            'bccAddresses'     => $bccAddresses,
+            'replyToAddresses' => $replyToAddresses,
+            'subject'          => $scheduleEmail->getSubject(),
+            'body'             => $scheduleEmail->getContent(),
+            'from'             => $data['from'] ?? null,
         ];
 
-        try {
-            $result = $client->sendMessage($params);
+        $successCount = 0;
+        $totalCount = count($toAddresses);
 
-            $statusCode = $result['@metadata']['statusCode'] ?? null;
-            if ($statusCode === 200) {
-                return true;
+        foreach ($toAddresses as $toAddress) {
+            $data = array_merge($baseData, ['toAddresses' => [$toAddress]]);
+
+            $params = [
+                'MessageBody'            => json_encode($data),
+                'QueueUrl'               => $this->QueueUrl,
+                'MessageGroupId'         => 'email-' . $scheduleEmail->getId(),
+                'MessageDeduplicationId' => 'email-' . $scheduleEmail->getId() . '-' . $toAddress . '-' . time(),
+            ];
+
+            try {
+                $result = $client->sendMessage($params);
+                $statusCode = $result['@metadata']['statusCode'] ?? null;
+                if ($statusCode === 200) {
+                    $successCount++;
+                }
+            } catch (AwsException $e) {
+                throw $e;
             }
-        } catch (AwsException $e) {
-            throw $e;
         }
 
-        return false;
+        return $successCount === $totalCount;
     }
-
 }
