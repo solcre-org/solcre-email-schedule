@@ -15,13 +15,11 @@ use Solcre\EmailSchedule\Service\EmailService;
 
 class AwsSqsTransport implements TransportInterface
 {
-    private Credentials $credentials;
     private string $QueueUrl;
     private string $region;
 
-    public function __construct(array $credentials, string $QueueUrl, string $region)
+    public function __construct(string $QueueUrl, string $region)
     {
-        $this->credentials = new Credentials($credentials['key'], $credentials['secret']);
         $this->QueueUrl = $QueueUrl;
         $this->region = $region;
     }
@@ -31,9 +29,8 @@ class AwsSqsTransport implements TransportInterface
         $isVerified = false;
 
         $sesClient = new SesClient([
-            'region'      => $this->region,
-            'version'     => '2010-12-01',
-            'credentials' => $this->credentials,
+            'region' => $this->region,
+            'version' => '2010-12-01',
         ]);
 
         $list = $sesClient->listVerifiedEmailAddresses();
@@ -47,9 +44,8 @@ class AwsSqsTransport implements TransportInterface
     public function send(ScheduleEmail $scheduleEmail): bool
     {
         $client = new SqsClient([
-            'region'      => $this->region,
-            'version'     => '2012-11-05',
-            'credentials' => $this->credentials,
+            'region' => $this->region,
+            'version' => '2012-11-05',
         ]);
 
         $toAddresses = [];
@@ -93,12 +89,12 @@ class AwsSqsTransport implements TransportInterface
         }
 
         $data = [
-            'toAddresses'      => $toAddresses,
-            'ccAddresses'      => $ccAddresses,
-            'bccAddresses'     => $bccAddresses,
+            'toAddresses' => $toAddresses,
+            'ccAddresses' => $ccAddresses,
+            'bccAddresses' => $bccAddresses,
             'replyToAddresses' => $replyToAddresses,
-            'subject'          => $scheduleEmail->getSubject(),
-            'body'             => $scheduleEmail->getContent(),
+            'subject' => $scheduleEmail->getSubject(),
+            'body' => $scheduleEmail->getContent(),
         ];
 
 
@@ -108,9 +104,9 @@ class AwsSqsTransport implements TransportInterface
         }
 
         $params = [
-            'MessageBody'               => \json_encode($data),
-            'QueueUrl'                  => $this->QueueUrl,
-            'MessageGroupId'            => 'Message-' . $scheduleEmail->getId(),
+            'MessageBody' => \json_encode($data),
+            'QueueUrl' => $this->QueueUrl,
+            'MessageGroupId' => 'Message-' . $scheduleEmail->getId(),
             'ContentBasedDeduplication' => true,
         ];
 

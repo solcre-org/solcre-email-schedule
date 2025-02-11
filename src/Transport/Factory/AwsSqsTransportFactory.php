@@ -13,15 +13,7 @@ class AwsSqsTransportFactory implements FactoryInterface
     {
         $credentials = $container->get('config')[Module::CONFIG_KEY]['transport']['aws-sqs'];
 
-        if (!isset($credentials['key']) ||
-            !isset($credentials['secret']) ||
-            !isset($credentials['url'])
-        ) {
-            throw new \InvalidArgumentException('Invalid AWS SQS credentials');
-        }
-
         return new AwsSqsTransport(
-            $credentials,
             $credentials['url'],
             $credentials['region'] ?? 'us-east-1');
     }
