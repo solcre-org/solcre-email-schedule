@@ -14,8 +14,6 @@ return [
                 'SECURE' => 'tls',
             ],
             'aws-sqs' => [
-                'key'    => 'your-aws-access-key',
-                'secret' => 'your-aws-secret-key',
                 'region' => 'your-aws-region',
                 'url'    => 'your-aws-sqs-url',
             ],
