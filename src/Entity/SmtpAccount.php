@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Solcre\EmailSchedule\Entity;
 
 class SmtpAccount

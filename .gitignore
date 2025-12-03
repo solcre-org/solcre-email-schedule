@@ -5,5 +5,7 @@
 vendor/
 /.php_cs.cache
 /.phpunit.result.cache
+/.phpunit.cache
 /test/reports
 .idea
+AGENTS.md

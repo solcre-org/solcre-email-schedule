@@ -1,85 +1,63 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Solcre\EmailSchedule\Entity;
 
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Solcre\EmailSchedule\Repository\ScheduleEmailRepository;
 
-/**
- * @ORM\Entity(repositoryClass="Solcre\EmailSchedule\Repository\ScheduleEmailRepository")
- * @ORM\Table(name="schedule_emails")
- */
+#[ORM\Entity(repositoryClass: ScheduleEmailRepository::class)]
+#[ORM\Table(name: 'schedule_emails')]
 class ScheduleEmail
 {
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
+    #[ORM\Column(type: 'integer')]
+    private ?int $id = null;
 
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     * @ORM\Column(type="integer")
-     */
-    private int $id;
+    #[ORM\Column(type: 'json', name: 'email_from')]
+    private array $emailFrom = [];
 
-    /**
-     * @ORM\Column(type="json", name="email_from")
-     */
-    private array $emailFrom;
+    #[ORM\Column(type: 'json')]
+    private array $addresses = [];
 
-    /**
-     * @ORM\Column(type="json")
-     */
-    private array $addresses;
+    #[ORM\Column(type: 'string')]
+    private string $subject = '';
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    private string $subject;
+    #[ORM\Column(type: 'string')]
+    private string $charset = 'utf-8';
 
-    /**
-     * @ORM\Column(type="string")
-     */
-    private string $charset;
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $altText = null;
 
-    /**
-     * @ORM\Column(type="string", nullable=true)
-     */
-    private string $altText;
+    #[ORM\Column(type: 'text')]
+    private string $content = '';
 
-    /**
-     * @ORM\Column(type="text")
-     */
-    private string $content;
+    #[ORM\Column(type: 'datetime', name: 'send_at', nullable: true)]
+    private ?DateTime $sendAt = null;
 
-    /**
-     * @ORM\Column(type="datetime", name="send_at", nullable=true)
-     */
-    private ?DateTime $sendAt;
-    /**
-     * @ORM\Column(type="datetime", name="created_at")
-     */
+    #[ORM\Column(type: 'datetime', name: 'created_at')]
     private DateTime $createdAt;
 
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private int $retried;
+    #[ORM\Column(type: 'integer')]
+    private int $retried = 0;
 
-    /**
-     * @ORM\Column(type="datetime", name="sending_date", nullable=true)
-     */
-    private ?DateTime $sendingDate;
+    #[ORM\Column(type: 'datetime', name: 'sending_date', nullable: true)]
+    private ?DateTime $sendingDate = null;
 
-    /**
-     * @return integer
-     */
-    public function getId(): int
+    public function __construct()
+    {
+        $this->createdAt = new DateTime();
+    }
+
+    public function getId(): ?int
     {
         return $this->id;
     }
 
-    /**
-     * @param integer $id
-     */
-    public function setId($id): void
+    public function setId(?int $id): void
     {
         $this->id = $id;
     }
@@ -89,161 +67,119 @@ class ScheduleEmail
      */
     public function getAddresses(): array
     {
+        $addresses = [];
+
         foreach ($this->addresses as $address) {
-            $addresses[] = new EmailAddress($address['email'], $address['name'], $address['type']);
+            if ($address instanceof EmailAddress) {
+                $addresses[] = $address;
+                continue;
+            }
+
+            if (isset($address['email'], $address['type'])) {
+                $addresses[] = new EmailAddress(
+                    $address['email'],
+                    $address['name'] ?? null,
+                    (int) $address['type']
+                );
+            }
         }
 
         return $addresses;
     }
 
     /**
-     * @param array $addresses
+     * @param EmailAddress[] $addresses
      */
-    public function setAddresses($addresses): void
+    public function setAddresses(array $addresses): void
     {
         $this->addresses = $addresses;
     }
 
-
-    /**
-     * @return string
-     */
     public function getCharset(): string
     {
         return $this->charset;
     }
 
-    /**
-     * @param string $charset
-     */
-    public function setCharset($charset): void
+    public function setCharset(string $charset): void
     {
         $this->charset = $charset;
     }
 
-    /**
-     * @return string
-     */
-    public function getAltText(): string
+    public function getAltText(): ?string
     {
         return $this->altText;
     }
 
-    /**
-     * @param string $altText
-     */
-    public function setAltText($altText): void
+    public function setAltText(?string $altText): void
     {
         $this->altText = $altText;
     }
 
-    /**
-     * @return string
-     */
     public function getContent(): string
     {
         return $this->content;
     }
 
-    /**
-     * @param string $content
-     */
-    public function setContent($content): void
+    public function setContent(string $content): void
     {
         $this->content = $content;
     }
 
-    /**
-     * @return DateTime|null
-     */
     public function getSendAt(): ?DateTime
     {
         return $this->sendAt;
     }
 
-    /**
-     * @param DateTime $sendAt
-     */
-    public function setSendAt(DateTime $sendAt): void
+    public function setSendAt(?DateTime $sendAt): void
     {
         $this->sendAt = $sendAt;
     }
 
-    /**
-     * @return array
-     */
     public function getEmailFrom(): array
     {
         return $this->emailFrom;
     }
 
-    /**
-     * @param array $emailFrom
-     */
-    public function setEmailFrom($emailFrom): void
+    public function setEmailFrom(array $emailFrom): void
     {
         $this->emailFrom = $emailFrom;
     }
 
-    /**
-     * @return string
-     */
     public function getSubject(): string
     {
         return $this->subject;
     }
 
-    /**
-     * @param string $subject
-     */
-    public function setSubject($subject): void
+    public function setSubject(string $subject): void
     {
         $this->subject = $subject;
     }
 
-    /**
-     * @return int
-     */
     public function getRetried(): int
     {
         return $this->retried;
     }
 
-    /**
-     * @param int $retried
-     */
-    public function setRetried($retried): void
+    public function setRetried(int $retried): void
     {
         $this->retried = $retried;
     }
 
-    /**
-     * @return DateTime|null
-     */
     public function getSendingDate(): ?DateTime
     {
         return $this->sendingDate;
     }
 
-    /**
-     * @param DateTime|null $sendingDate
-     */
     public function setSendingDate(?DateTime $sendingDate): void
     {
         $this->sendingDate = $sendingDate;
     }
 
-    /**
-     * @return DateTime
-     */
     public function getCreatedAt(): DateTime
     {
         return $this->createdAt;
     }
 
-    /**
-     * @param DateTime $createdAt
-     */
     public function setCreatedAt(DateTime $createdAt): void
     {
         $this->createdAt = $createdAt;

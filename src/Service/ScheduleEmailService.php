@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Solcre\EmailSchedule\Service;
 
 use DateTime;
@@ -9,7 +11,12 @@ use InvalidArgumentException;
 use Solcre\EmailSchedule\Entity\EmailAddress;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use Solcre\EmailSchedule\Exception\BaseException;
+use Solcre\EmailSchedule\Repository\ScheduleEmailRepository;
+use function array_diff_key;
+use function array_flip;
+use function array_intersect;
 use function array_key_exists;
+use function array_keys;
 use function count;
 use function sprintf;
 
@@ -18,7 +25,7 @@ class ScheduleEmailService
     private const MAX_RETRIED = 3;
     private const DELAYED_EMAIL_HOUR = 1;
     private EntityManager $entityManager;
-    private $repository;
+    private ScheduleEmailRepository $repository;
 
     public function __construct(EntityManager $entityManager)
     {
@@ -26,14 +33,11 @@ class ScheduleEmailService
         $this->repository = $this->entityManager->getRepository(ScheduleEmail::class);
     }
 
-    /**
-     * @throws \Solcre\EmailSchedule\Exception\BaseException
-     */
-    public function add($data): ScheduleEmail
+    public function add(array $data): ScheduleEmail
     {
-        try {
-            $this->validateData($data);
+        $this->validateData($data);
 
+        try {
             $scheduleEmail = new ScheduleEmail();
             $scheduleEmail->setCharset($data['charset'] ?? 'UTF-8');
             $scheduleEmail->setAddresses($this->normalizeAddresses($data['addresses']));
@@ -50,15 +54,17 @@ class ScheduleEmailService
 
             return $scheduleEmail;
         } catch (Exception $exception) {
-            throw new BaseException('Error creating schedule email', $exception->getCode());
+            throw new BaseException('Error creating schedule email', $exception->getCode() ?: 500);
         }
     }
 
+    /**
+     * @param EmailAddress[] $addresses
+     */
     private function normalizeAddresses(array $addresses): array
     {
         $normalized = [];
 
-        /* @var EmailAddress $address */
         foreach ($addresses as $address) {
             $normalized[] = [
                 'email' => $address->getEmail(),
@@ -81,23 +87,21 @@ class ScheduleEmailService
 
     private function arrayKeysExists(array $keys, array $arr): bool
     {
-        return !array_diff_key(array_flip($keys), $arr);
+        return array_diff_key(array_flip($keys), $arr) === [];
     }
 
     public function anyArrayKeyExist(array $keys, array $data): bool
     {
-        $keysReceived = array_keys($data);
-
-        return !((!count(array_intersect($keys, $keysReceived))) > 0);
+        return count(array_intersect($keys, array_keys($data))) > 0;
     }
 
     /**
-     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     * @throws BaseException
      */
     public function patchScheduleEmail(ScheduleEmail $scheduleEmailEntity, array $data): ScheduleEmail
     {
         try {
-            if (!$this->anyArraykeyExist(['sendAt', 'isSending', 'retried'], $data)) {
+            if (!$this->anyArrayKeyExist(['sendAt', 'isSending', 'retried'], $data)) {
                 return $scheduleEmailEntity;
             }
 
@@ -115,39 +119,33 @@ class ScheduleEmailService
             }
 
             if (array_key_exists('retried', $data)) {
-                $scheduleEmailEntity->setRetried($data['retried']);
+                $scheduleEmailEntity->setRetried((int) $data['retried']);
             }
 
             $this->entityManager->flush($scheduleEmailEntity);
 
             return $scheduleEmailEntity;
         } catch (Exception $exception) {
-            throw new BaseException('Error patching schedule email', $exception->getCode());
+            throw new BaseException('Error patching schedule email', $exception->getCode() ?: 500);
         }
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    public function markEmailAsSending($emailsToSend)
+    public function markEmailAsSending(array $emailsToSend): bool
     {
-        try {
-            return $this->repository->markEmailAsSending($emailsToSend);
-        } catch (Exception $e) {
-            throw  $e;
-        }
+        return $this->repository->markEmailAsSending($emailsToSend) ?? false;
     }
 
     /**
-     * @throws \Exception
+     * @return ScheduleEmail[]
+     *
+     * @throws Exception
      */
-    public function fetchAvailableScheduledEmails()
+    public function fetchAvailableScheduledEmails(): ?array
     {
-        try {
-            return $this->repository->fetchAvailableScheduledEmails(self::MAX_RETRIED);
-        } catch (Exception $e) {
-            throw  $e;
-        }
+        return $this->repository->fetchAvailableScheduledEmails(self::MAX_RETRIED);
     }
 
     private function calculateOffset(int $page, int $size): int
@@ -156,40 +154,27 @@ class ScheduleEmailService
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function fetchScheduledEmailsAsArray(?int $page = null, ?int $size = null): array
     {
-        try {
-            if ($page === null) {
-                $page = 1;
-            }
+        $page = $page ?? 1;
+        $size = $size ?? 100;
+        $offset = $this->calculateOffset($page, $size);
 
-            if ($size === null) {
-                $size = 100;
-            }
-
-            $offset = $this->calculateOffset($page, $size);
-            return $this->repository->fetchScheduledEmailsAsArray($offset, $size);
-        } catch (Exception $e) {
-            throw  $e;
-        }
+        return $this->repository->fetchScheduledEmailsAsArray($offset, $size);
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    public function processDelayedEmails()
+    public function processDelayedEmails(): void
     {
-        try {
-            $delayedTime = new DateTime();
-            $hourPast = sprintf('- %s hour', self::DELAYED_EMAIL_HOUR);
-            $delayedTime->modify($hourPast);
-            $delayedMinutes = self::DELAYED_EMAIL_HOUR * 60;
+        $delayedTime = new DateTime();
+        $hourPast = sprintf('- %s hour', self::DELAYED_EMAIL_HOUR);
+        $delayedTime->modify($hourPast);
+        $delayedMinutes = self::DELAYED_EMAIL_HOUR * 60;
 
-            return $this->repository->processDelayedEmails($delayedTime->format('Y-m-d H:i:s'), $delayedMinutes);
-        } catch (Exception $e) {
-            throw  $e;
-        }
+        $this->repository->processDelayedEmails($delayedTime->format('Y-m-d H:i:s'), $delayedMinutes);
     }
 }

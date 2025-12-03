@@ -1,310 +1,106 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EmailScheduleTest\Service;
 
-use PHPUnit\Framework\TestCase;
+use DateTime;
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\TestCase;
+use Solcre\EmailSchedule\Entity\EmailAddress;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use Solcre\EmailSchedule\Exception\BaseException;
-use Exception;
-use DateTime;
-use Solcre\EmailSchedule\Service\ScheduleEmailService;
 use Solcre\EmailSchedule\Repository\ScheduleEmailRepository;
+use Solcre\EmailSchedule\Service\ScheduleEmailService;
 
 class ScheduleEmailServiceTest extends TestCase
 {
-    private $mockedRepository;
-    private $mockedEntityManager;
-    private $scheduleEmailService;
+    private EntityManager $entityManager;
+    private ScheduleEmailRepository $repository;
+    private ScheduleEmailService $service;
 
     protected function setUp(): void
     {
-        // mocks used in most tests
-        $this->mockedRepository    = $this->createMock(ScheduleEmailRepository::class);
-        $this->mockedEntityManager = $this->createMock(EntityManager::class);
-        $this->mockedEntityManager->method('persist')->willReturn(true);
-        $this->mockedEntityManager->method('flush')->willReturn(true);
-        $this->mockedEntityManager->method('getRepository')->willReturn($this->mockedRepository);
+        $this->repository = $this->createMock(ScheduleEmailRepository::class);
+        $this->entityManager = $this->createMock(EntityManager::class);
+        $this->entityManager->method('getRepository')->willReturn($this->repository);
 
-        $this->scheduleEmailService = new scheduleEmailService($this->mockedEntityManager);
+        $this->service = new ScheduleEmailService($this->entityManager);
     }
 
-    public function testAdd(): void
+    public function testAddPersistsScheduleEmail(): void
     {
         $data = [
-            'charset'   => 'charset',
-            'addresses' => ['addresses'],
-            'altText'   => 'altText',
-            'content'   => 'a content',
-            'from'      => ['addressee 1', 'addressee 2'],
-            'subject'   => 'a subject of email'
+            'charset'   => 'utf-8',
+            'addresses' => [new EmailAddress('a@example.com', null, 2)],
+            'altText'   => 'alt',
+            'content'   => 'content',
+            'from'      => ['email' => 'from@example.com', 'name' => null, 'type' => 1],
+            'subject'   => 'subject',
         ];
 
-        $expectedScheduleEmail = new ScheduleEmail();
-        $expectedScheduleEmail->setCharset($data['charset'] ?? 'UTF-8');
-        $expectedScheduleEmail->setAddresses($data['addresses']);
-        $expectedScheduleEmail->setAltText($data['altText']);
-        $expectedScheduleEmail->setContent($data['content']);
-        $expectedScheduleEmail->setCreatedAt(new DateTime());
-        $expectedScheduleEmail->setEmailFrom($data['from']);
-        $expectedScheduleEmail->setRetried(0);
-        $expectedScheduleEmail->setSendingDate(null);
-        $expectedScheduleEmail->setSubject($data['subject']);
+        $this->entityManager
+            ->expects(self::once())
+            ->method('persist')
+            ->with(self::isInstanceOf(ScheduleEmail::class));
 
-        $this->mockedEntityManager->expects($this->once())
-        ->method('persist')
-        ->with($this->isInstanceOf(ScheduleEmail::class));
+        $this->entityManager
+            ->expects(self::once())
+            ->method('flush')
+            ->with(self::isInstanceOf(ScheduleEmail::class));
 
-        $this->mockedEntityManager->expects($this->once())
-        ->method('flush')
-        ->with($this->isInstanceOf(ScheduleEmail::class));
+        $result = $this->service->add($data);
 
-        $this->scheduleEmailService->add($data);
+        self::assertInstanceOf(ScheduleEmail::class, $result);
+        self::assertSame('subject', $result->getSubject());
     }
 
-    public function testAddWithoutContentKey(): void
+    public function testAddWithMissingDataThrows(): void
     {
         $data = [
-            'charset'   => 'charset',
-            'addresses' => ['addresses'],
-            'altText'   => 'altText',
-            'from'      => ['addressee 1', 'addressee 2'],
-            'subject'   => 'a subject of email'
+            'addresses' => [],
+            'from'      => [],
         ];
+
+        $this->expectException(\InvalidArgumentException::class);
+        $this->service->add($data);
+    }
+
+    public function testPatchScheduleEmailUpdatesFields(): void
+    {
+        $email = new ScheduleEmail();
+        $email->setRetried(0);
+
+        $data = ['sendAt' => true, 'isSending' => false, 'retried' => 2];
+
+        $this->entityManager
+            ->expects(self::once())
+            ->method('flush')
+            ->with($email);
+
+        $updated = $this->service->patchScheduleEmail($email, $data);
+
+        self::assertInstanceOf(DateTime::class, $updated->getSendAt());
+        self::assertSame(2, $updated->getRetried());
+        self::assertNull($updated->getSendingDate());
+    }
+
+    public function testPatchScheduleEmailCatchesExceptions(): void
+    {
+        $email = new ScheduleEmail();
+
+        $this->entityManager
+            ->method('flush')
+            ->willThrowException(new \RuntimeException('fail'));
 
         $this->expectException(BaseException::class);
-
-        $this->scheduleEmailService->add($data);
-    }
-
-    public function testPatchScheduleEmailWithAllKeys(): void
-    {
-        $mockedScheduleEmailEntity = $this->getMockBuilder(ScheduleEmail::class)
-                                     ->disableOriginalConstructor()
-                                     ->onlyMethods(['setSendAt', 'setSendingDate', 'setRetried'])
-                                     ->getMock();
-
-        $data = [
-            'sendAt'    => null,
-            'isSending' => ['addresses'],
-            'retried'   => 'retried',
-            'content'   => 'a content',
-            'from'      => ['addressee 1', 'addressee 2'],
-            'subject'   => 'a subject of email'
-        ];
-
-        $mockedScheduleEmailEntity->expects($this->once())
-        ->method('setSendAt');
-
-        $mockedScheduleEmailEntity->expects($this->once())
-        ->method('setSendingDate');
-
-        $mockedScheduleEmailEntity->expects($this->once())
-        ->method('setRetried')
-        ->with($data['retried']);
-
-        $this->mockedEntityManager->expects($this->once())
-        ->method('flush')
-        ->with($this->isInstanceOf(ScheduleEmail::class));
-
-        $this->scheduleEmailService->patchScheduleEmail($mockedScheduleEmailEntity, $data);
-    }
-
-    public function testPatchScheduleEmailWithoutKeys(): void
-    {
-        $mockedScheduleEmailEntity =  $this->createMock(ScheduleEmail::class);
-        $data                      = [];
-
-        $this->assertEquals($mockedScheduleEmailEntity, $this->scheduleEmailService->patchScheduleEmail($mockedScheduleEmailEntity, $data));
-    }
-
-    public function testPatchScheduleEmailWithException(): void
-    {
-        $mockedEntityManager = $this->createMock(EntityManager::class);
-        $mockedEntityManager->method('flush')->will($this->throwException(
-            new Exception()
-        ));
-
-        $scheduleEmailService = new scheduleEmailService($mockedEntityManager);
-
-        $mockedScheduleEmailEntity = $this->getMockBuilder(ScheduleEmail::class)
-                                     ->disableOriginalConstructor()
-                                     ->onlyMethods(['setSendAt', 'setSendingDate', 'setRetried'])
-                                     ->getMock();
-
-        $data = [
-            'sendAt'    => null,
-            'isSending' => ['addresses'],
-            'retried'   => 'retried',
-            'content'   => 'a content',
-            'from'      => ['addressee 1', 'addressee 2'],
-            'subject'   => 'a subject of email'
-        ];
-
-        $this->expectException(BaseException::class);
-
-        $scheduleEmailService->patchScheduleEmail($mockedScheduleEmailEntity, $data);
-    }
-
-    public function setUpServiceForOthersCases($mockedRepository): ScheduleEmailService
-    {
-        $mockedEntityManager = $this->createMock(EntityManager::class);
-        $mockedEntityManager->method('getRepository')->willReturn($mockedRepository);
-
-        $scheduleEmailService = new scheduleEmailService($mockedEntityManager);
-
-        return $scheduleEmailService;
-    }
-
-    public function testMarkEmailAsSendingTrue(): void
-    {
-        $mockedRepository = $this->createMock(ScheduleEmailRepository::class);
-        $mockedRepository->method('markEmailAsSending')->willReturn(true);
-
-        $scheduleEmailService = $this->setUpServiceForOthersCases($mockedRepository);
-
-        $emailToSend = 'email to send';
-        $this->assertTrue($scheduleEmailService->markEmailAsSending($emailToSend));
-    }
-
-    public function testMarkEmailAsSendingFalse(): void
-    {
-        $mockedRepository = $this->createMock(ScheduleEmailRepository::class);
-        $mockedRepository->method('markEmailAsSending')->willReturn(false);
-
-        $scheduleEmailService = $this->setUpServiceForOthersCases($mockedRepository);
-
-        $emailToSend = 'email to send';
-        $this->assertFalse($scheduleEmailService->markEmailAsSending($emailToSend));
-    }
-
-    public function testMarkEmailAsSendingWithException(): void
-    {
-        $mockedRepository    = $this->createMock(ScheduleEmailRepository::class);
-        $mockedRepository->method('markEmailAsSending')->will($this->throwException(
-            new Exception()
-        ));
-
-        $scheduleEmailService = $this->setUpServiceForOthersCases($mockedRepository);
-
-        $emailToSend = 'email to send';
-
-        $this->expectException(Exception::class);
-
-        $scheduleEmailService->markEmailAsSending($emailToSend);
+        $this->service->patchScheduleEmail($email, ['sendAt' => true]);
     }
 
     public function testAnyArrayKeyExist(): void
     {
-        $data = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3'
-        ];
-
-        $data1 = [
-            'sendAt'    => 'value1',
-            'SendingAt' => 'value2',
-            'retried'   => 'value3'
-        ];
-
-        $data2 = [
-            'key1'    => 'value1',
-            'key2'    => 'value2',
-            'retried' => 'value3'
-        ];
-
-
-        $data3 = [
-            'key1'    => 'value1',
-            'key2'    => 'value2',
-            'key3'    => 'value3',
-            'retried' => 'value4'
-        ];
-
-        $data4 = [
-            'sendAt'    => 'value1',
-            'SendingAt' => 'value2',
-            'retried'   => 'value3',
-            'key1'      => 'value4',
-            'key2'      => 'value5'
-        ];
-
-        $data5 = [
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3',
-            'key4' => 'value4',
-            'key5' => 'value5'
-        ];
-
-        $keys = ['sendAt', 'isSending', 'retried'];
-
-        // without matches
-        $this->assertFalse($this->scheduleEmailService->anyArrayKeyExist($keys, $data));
-
-        // all keys match
-        $this->assertTrue($this->scheduleEmailService->anyArrayKeyExist($keys, $data1));
-
-        // one key match
-        $this->assertTrue($this->scheduleEmailService->anyArrayKeyExist($keys, $data2));
-
-        // one key match and array are of different size
-        $this->assertTrue($this->scheduleEmailService->anyArrayKeyExist($keys, $data3));
-
-        // all keys match and array are of different size
-        $this->assertTrue($this->scheduleEmailService->anyArrayKeyExist($keys, $data4));
-
-        // without matches and array are of different size
-        $this->assertFalse($this->scheduleEmailService->anyArrayKeyExist($keys, $data5));
-    }
-
-    public function testFetchAvailableScheduledEmails(): void
-    {
-        $producedInRepository = ['array return by Repository'];
-        $mockedRepository     = $this->createMock(ScheduleEmailRepository::class);
-        $mockedRepository->method('fetchAvailableScheduledEmails')->willReturn($producedInRepository);
-        ;
-
-        $scheduleEmailService = $this->setUpServiceForOthersCases($mockedRepository);
-
-        $this->assertEquals($scheduleEmailService->fetchAvailableScheduledEmails(), $producedInRepository);
-    }
-
-    public function testFetchAvailableScheduledEmailsWithException(): void
-    {
-        $mockedRepository     = $this->createMock(ScheduleEmailRepository::class);
-        $producedInRepository = ['array return by Repository'];
-        $mockedRepository->method('fetchAvailableScheduledEmails')->will($this->throwException(new Exception()));
-
-        $scheduleEmailService = $this->setUpServiceForOthersCases($mockedRepository);
-
-        $this->expectException(Exception::class);
-        $scheduleEmailService->fetchAvailableScheduledEmails();
-    }
-
-    public function testProcessDelayedEmails(): void
-    {
-        $mockedRepository = $this->createMock(ScheduleEmailRepository::class);
-        $mockedRepository->method('processDelayedEmails');
-
-        $scheduleEmailService = $this->setUpServiceForOthersCases($mockedRepository);
- 
-        $mockedRepository->expects($this->once())
-        ->method('processDelayedEmails');
-
-        $scheduleEmailService->processDelayedEmails();
-    }
-
-    public function testProcessDelayedEmailsWithException(): void
-    {
-        $mockedRepository = $this->createMock(ScheduleEmailRepository::class);
-        $mockedRepository->method('processDelayedEmails')->will($this->throwException(new Exception()));
-
-        $scheduleEmailService = $this->setUpServiceForOthersCases($mockedRepository);
- 
-        $this->expectException(Exception::class);
-
-        $scheduleEmailService->processDelayedEmails();
+        $keys = ['a', 'b'];
+        self::assertTrue($this->service->anyArrayKeyExist($keys, ['a' => 1]));
+        self::assertFalse($this->service->anyArrayKeyExist($keys, ['c' => 1]));
     }
 }

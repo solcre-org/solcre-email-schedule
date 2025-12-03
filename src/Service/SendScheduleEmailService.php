@@ -1,21 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Solcre\EmailSchedule\Service;
 
 use Doctrine\DBAL\Driver\PDO\MySQL\Driver;
+use Doctrine\DBAL\Exception as DbalException;
 use Doctrine\ORM\EntityManager;
 use Exception;
 use Psr\Log\LoggerInterface;
-use Solcre\EmailSchedule\Entity\EmailAddress;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use function array_map;
+use function count;
+use function date;
+use function fclose;
+use function fopen;
+use function fwrite;
 use function is_array;
 
 class SendScheduleEmailService extends LoggerService
 {
+    private EntityManager $entityManager;
     private ScheduleEmailService $scheduleEmailService;
     private EmailService $emailService;
-    private EntityManager $entityManager;
 
     public function __construct(EntityManager $entityManager, ScheduleEmailService $scheduleEmailService, EmailService $emailService, ?LoggerInterface $logger)
     {
@@ -31,75 +38,64 @@ class SendScheduleEmailService extends LoggerService
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DbalException
      */
     private function lockTable(): void
     {
         if ($this->isMysqlDriver()) {
-            try {
-                $this->entityManager->getConnection()->executeStatement('LOCK TABLES schedule_emails as se WRITE;');
-            } catch (\Doctrine\DBAL\Exception $e) {
-                throw $e;
-            }
+            $this->entityManager->getConnection()->executeStatement('LOCK TABLES schedule_emails as se WRITE;');
         }
     }
 
     /**
-     * @throws \Doctrine\DBAL\Exception
+     * @throws DbalException
      */
     private function unlockTable(): void
     {
         if ($this->isMysqlDriver()) {
-            try {
-                $this->entityManager->getConnection()->executeStatement('UNLOCK TABLES;');
-            } catch (\Doctrine\DBAL\Exception $e) {
-                throw $e;
-            }
+            $this->entityManager->getConnection()->executeStatement('UNLOCK TABLES;');
         }
     }
 
     /**
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Solcre\EmailSchedule\Exception\BaseException
-     * @throws \Doctrine\DBAL\Exception
-     */
-    /**
+     * @throws Exception
      */
     public function sendScheduledEmails(): bool
     {
+        $result = false;
+        $this->lockTable();
+
         try {
-            $this->lockTable();
-            $scheduledEmailsToSend = $this->scheduleEmailService->fetchAvailableScheduledEmails();
-            $result                = false;
+            $scheduledEmailsToSend = $this->scheduleEmailService->fetchAvailableScheduledEmails() ?? [];
 
-            if (! empty($scheduledEmailsToSend) && is_array($scheduledEmailsToSend)) {
-                $result = $this->markEmailAsSending($scheduledEmailsToSend);
+            if (!empty($scheduledEmailsToSend) && is_array($scheduledEmailsToSend)) {
+                $marked = $this->markEmailAsSending($scheduledEmailsToSend);
 
-                if ($result) {
+                if ($marked) {
                     $this->entityManager->beginTransaction();
                     $result = $this->processEmails($scheduledEmailsToSend);
                     $this->entityManager->flush();
                     $this->entityManager->commit();
                 }
             }
-
-            $this->unlockTable();
-            return $result;
         } catch (Exception $e) {
-            if ($this->entityManager->isOpen()) {
-                $this->entityManager->flush();
-                $this->entityManager->commit();
+            if ($this->entityManager->getConnection()->isTransactionActive()) {
+                $this->entityManager->rollback();
             }
             throw $e;
+        } finally {
+            $this->unlockTable();
         }
+
+        return $result;
     }
 
     /**
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\DBAL\Exception
+     * @param ScheduleEmail[] $emailsToSend
+     *
+     * @throws Exception
      */
-    private function markEmailAsSending(array $emailsToSend): ?bool
+    private function markEmailAsSending(array $emailsToSend): bool
     {
         $emailsToSendIds = array_map(
             static function (ScheduleEmail $emailToSend) {
@@ -112,56 +108,40 @@ class SendScheduleEmailService extends LoggerService
             return false;
         }
 
-        try {
-            $result = $this->scheduleEmailService->markEmailAsSending($emailsToSendIds);
-            $this->unlockTable();
+        $result = $this->scheduleEmailService->markEmailAsSending($emailsToSendIds);
 
-            if (! $result) {
-                return false;
-            }
-
-            foreach ($emailsToSend as $email) {
-                $this->entityManager->refresh($email);
-            }
-
-            return true;
-        } catch (Exception $e) {
-            throw $e;
+        if (!$result) {
+            return false;
         }
+
+        foreach ($emailsToSend as $email) {
+            $this->entityManager->refresh($email);
+        }
+
+        return true;
     }
 
     /**
-     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     * @param ScheduleEmail[] $emailsToSend
      */
-    private function processEmails(array $emailsToSend): ?bool
+    private function processEmails(array $emailsToSend): bool
     {
         $resultSend = false;
-        /* @var $scheduleEmail ScheduleEmail */
+
         foreach ($emailsToSend as $scheduleEmail) {
             try {
-                $addressesToEmail = $this->createAddresses($scheduleEmail->getAddresses());
+                $resultSend = $this->emailService->sendScheduledEmail($scheduleEmail);
 
-                if (empty($addressesToEmail)) {
-                    continue;
-                }
-
-                $from       = $this->createEmailFrom($scheduleEmail->getEmailFrom());
-                $resultSend = $this->sendEmail($from, $addressesToEmail, $scheduleEmail);
-
-                $dataToPatch = [];
-                if ($resultSend) {
-                    $dataToPatch = [
-                        'sendAt' => true
-                    ];
-                }
-
-                if (! $resultSend) {
-                    $message = 'Email Schedule ID: ' . $scheduleEmail->getId();
-                    $this->logToFile($message);
-                    $dataToPatch = [
+                $dataToPatch = $resultSend
+                    ? ['sendAt' => true]
+                    : [
                         'retried'   => $scheduleEmail->getRetried() + 1,
                         'isSending' => false,
                     ];
+
+                if (!$resultSend) {
+                    $message = 'Email Schedule ID: ' . $scheduleEmail->getId();
+                    $this->logToFile($message);
                 }
 
                 $this->scheduleEmailService->patchScheduleEmail($scheduleEmail, $dataToPatch);
@@ -171,56 +151,19 @@ class SendScheduleEmailService extends LoggerService
                     'isSending' => false,
                 ];
                 $this->scheduleEmailService->patchScheduleEmail($scheduleEmail, $dataToPatch);
-                unset($e);
+                $resultSend = false;
             }
         }
 
         return $resultSend;
     }
 
-    private function createAddresses(array $addresses): array
+    private function logToFile(string $msg): void
     {
-        $addressesToEmail = [];
-        if (\count($addresses) > 0) {
-            foreach ($addresses as $emailsAddress) {
-                $addressesToEmail[] = new EmailAddress($emailsAddress['email'], $emailsAddress['name'], $emailsAddress['type']);
-            }
-        }
-
-        return $addressesToEmail;
-    }
-
-    private function createEmailFrom(array $fromEmail): EmailAddress
-    {
-        return new EmailAddress($fromEmail['email'], $fromEmail['name'] ?? null, $fromEmail['type']);
-    }
-
-    private function sendEmail(EmailAddress $from, array $addressesToEmail, ScheduleEmail $scheduleEmail): ?bool
-    {
-        try {
-            return $this->emailService->send(
-                $from,
-                $addressesToEmail,
-                $scheduleEmail->getSubject(),
-                $scheduleEmail->getContent(),
-                $scheduleEmail->getCharset(),
-                $scheduleEmail->getAltText()
-            );
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    private function logToFile($msg): void
-    {
-        // open file
         $fd = fopen(__DIR__ . '/../Log/email_error.txt', 'ab');
         if ($fd !== false) {
-            // append date/time to message
             $str = '[' . date('Y/m/d h:i:s') . ']' . $msg;
-            // write string
             fwrite($fd, $str . "\n");
-            // close file
             fclose($fd);
         }
     }

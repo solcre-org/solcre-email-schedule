@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Solcre\EmailSchedule\Service;
 
 use Exception;
@@ -11,18 +13,16 @@ use function strtolower;
 class LoggerService
 {
     public const LEVELS = ['emergency', 'alert', 'critical', 'error', 'warning', 'notice', 'info', 'debug', 'log'];
+
     private ?LoggerInterface $logger;
 
-    /**
-     * @param LoggerInterface|null $logger
-     */
     public function __construct(?LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
     /**
-     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     * @throws BaseException
      */
     public function logMessage(Exception $exception, array $context, string $level = 'error'): void
     {
@@ -33,13 +33,13 @@ class LoggerService
     }
 
     /**
-     * @throws \Solcre\EmailSchedule\Exception\BaseException
+     * @throws BaseException
      */
     private function validateLevel(string $level): void
     {
         $level = strtolower($level);
 
-        if (in_array($level, self::LEVELS, true)) {
+        if (!in_array($level, self::LEVELS, true)) {
             throw new BaseException('Log level does not exists', 404);
         }
     }

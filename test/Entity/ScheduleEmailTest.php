@@ -4,6 +4,7 @@ namespace EmailScheduleTest\Entity;
 
 use PHPUnit\Framework\TestCase;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
+use Solcre\EmailSchedule\Entity\EmailAddress;
 use Exception;
 use DateTime;
 
@@ -15,7 +16,7 @@ class ScheduleEmailTest extends TestCase
 
         $id          = 1;
         $emailFrom   = ['addressee 1', 'addressee 2'];
-        $addresses   = ['addresses'];
+        $addresses   = [new EmailAddress('to@example.com', 'Name', 2)];
         $subject     = 'a subject of email';
         $charset     = 'charset';
         $altText     = 'altext';

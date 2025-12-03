@@ -1,14 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace EmailScheduleTest\Service;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\AbstractMySQLDriver;
-use PHPUnit\Framework\TestCase;
+use Doctrine\DBAL\Driver;
 use Doctrine\ORM\EntityManager;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Solcre\EmailSchedule\Entity\EmailAddress;
+use PHPUnit\Framework\TestCase;
 use Solcre\EmailSchedule\Entity\ScheduleEmail;
 use Solcre\EmailSchedule\Service\EmailService;
 use Solcre\EmailSchedule\Service\ScheduleEmailService;
@@ -16,82 +15,42 @@ use Solcre\EmailSchedule\Service\SendScheduleEmailService;
 
 class SendScheduleEmailServiceTest extends TestCase
 {
-    private $scheduleEmailService;
-    private $emailService;
-    private $mockedEntityManager;
-    private $sendScheduleEmailService;
-
-    public function setup(): void
+    public function testSendScheduledEmailsWithoutWork(): void
     {
-        $this->mockedEntityManager  = $this->createMock(EntityManager::class);
-        $this->emailService         = $this->createMock(EmailService::class);
-
-        $this->scheduleEmailService = $this->getMockBuilder(ScheduleEmailService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['fetchAvailableScheduledEmails'])
-            ->getMock();
-
-        $listOfMails = ['mail 1', 'mail 2'];
-        $this->scheduleEmailService->method('fetchAvailableScheduledEmails')->willReturn($listOfMails);
-
-        $this->sendScheduleEmailService = new SendScheduleEmailService(
-            $this->mockedEntityManager,
-            $this->scheduleEmailService,
-            $this->emailService,
-            null
-        );
+        $service = $this->buildService([], false);
+        self::assertFalse($service->sendScheduledEmails());
     }
 
-    public function setupWithoutEmailsToSend(): SendScheduleEmailService
+    public function testSendScheduledEmailsWithWork(): void
     {
-        $mockedEntityManager = $this->getMockBuilder(EntityManager::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getConnection'])
-            ->getMock();
+        $email = new ScheduleEmail();
+        $email->setSubject('hello');
+        $email->setEmailFrom(['email' => 'from@example.com', 'type' => 1]);
+        $email->setAddresses([['email' => 'to@example.com', 'type' => 2]]);
 
-//        $returnTrue = new class() {
-//            public function exec()
-//            {
-//                return true;
-//            }
-//        };
-
-        $mockedConnection = $this->getMockBuilder(Connection::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getDriver'])
-            ->getMock();
-
-
-        $mockedDriver = $this->getMockBuilder(AbstractMySQLDriver::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockedEntityManager->method('getConnection')->willReturn($mockedConnection);
-        $mockedConnection->method('getDriver')->willReturn($mockedDriver);
-
-
-        $scheduleEmailService = $this->getMockBuilder(ScheduleEmailService::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['fetchAvailableScheduledEmails'])
-            ->getMock();
-
-        $listOfMails = [];
-        $scheduleEmailService->method('fetchAvailableScheduledEmails')->willReturn($listOfMails);
-
-        $sendScheduleEmailService = new SendScheduleEmailService(
-            $mockedEntityManager,
-            $scheduleEmailService,
-            $this->emailService,
-            null
-        );
-
-        return $sendScheduleEmailService;
+        $service = $this->buildService([$email], true);
+        self::assertTrue($service->sendScheduledEmails());
     }
 
-    public function testSendScheduledEmailsWithoutEmails(): void
+    /**
+     * @param ScheduleEmail[] $emails
+     */
+    private function buildService(array $emails, bool $markSuccess): SendScheduleEmailService
     {
-        $sendScheduleEmailService = $this->setupWithoutEmailsToSend();
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getDriver')->willReturn($this->createMock(Driver::class));
+        $connection->method('isTransactionActive')->willReturn(false);
 
-        $this->assertEquals($sendScheduleEmailService->sendScheduledEmails(), false);
+        $entityManager = $this->createMock(EntityManager::class);
+        $entityManager->method('getConnection')->willReturn($connection);
+
+        $scheduleEmailService = $this->createMock(ScheduleEmailService::class);
+        $scheduleEmailService->method('fetchAvailableScheduledEmails')->willReturn($emails);
+        $scheduleEmailService->method('markEmailAsSending')->willReturn($markSuccess);
+
+        $emailService = $this->createMock(EmailService::class);
+        $emailService->method('sendScheduledEmail')->willReturn(true);
+
+        return new SendScheduleEmailService($entityManager, $scheduleEmailService, $emailService, null);
     }
 }
