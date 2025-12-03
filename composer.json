@@ -10,7 +10,7 @@
   ],
   "license": "BSD-3-Clause",
   "require": {
-    "php": "^8.3",
+    "php": "^8.2",
     "doctrine/orm": "^3.3",
     "aws/aws-sdk-php": "^3.320",
     "phpmailer/phpmailer": "^6.9",
