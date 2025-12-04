@@ -11,10 +11,10 @@
   "license": "BSD-3-Clause",
   "require": {
     "php": "^8.2",
-    "doctrine/orm": "^3.3",
+    "doctrine/orm": "^2.13 || ^3.3",
     "aws/aws-sdk-php": "^3.320",
     "phpmailer/phpmailer": "^6.9",
-    "psr/log": "^3.0",
+    "psr/log": "^2.0 || ^3.0",
     "smarty/smarty": "^4.3",
     "twig/twig": "^3.8"
   },
