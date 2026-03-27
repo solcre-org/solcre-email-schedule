@@ -39,7 +39,7 @@ class LoggerService
     {
         $level = strtolower($level);
 
-        if (in_array($level, self::LEVELS, true)) {
+        if (!in_array($level, self::LEVELS, true)) {
             throw new BaseException('Log level does not exists', 404);
         }
     }
